@@ -34,12 +34,15 @@ object no_oPC;
 //15 - vyroba katana       tag: no_vyr_ka
 //16 - vyroba rapir        tag: no_vyr_ra
 //17 - vyroba scimitar     tag: no_vyr_sc
+//18 - vyroba rt.obri mec  tag: no_vyr_y1
+//19 - vyroba rtut dlouhy  tag: no_vyr_y2
 //////////////////////////
 //20 - vyroba halapart     tag: no_vyr_ha
 //21 - vyroba kopi         tag: no_vyr_ko
 //22 - vyroba kosa         tag: no_vyr_ks
 //23 - vyroba trident      tag: no_vyr_tr
 //24 - vyroba hole         tag: no_vyr_hu
+//25 - vyroba jednorucniho kopi  tag: no_vyr_ss
 /////////////////////////
 //31 - vyroba bice         tag: no_vyr_bc
 //32 - vyroba kamy         tag: no_vyr_km
@@ -72,9 +75,8 @@ object no_oPC;
 //74 - vyroba sap          tag: no_vyr_x6
 //75 - vyroba ob.scimi     tag: no_vyr_x7
 //76 - vyroba tezky pal.   tag: no_vyr_x8
-//77 - vyroba rt.obri mec  tag: no_vyr_y1
-//78 - vyroba rtut dlouhy  tag: no_vyr_y2
-//79 - vyroba maug dv. mec tag: no_vyr_y3
+//77 - vyroba krumpace     tag: no_vyr_hp
+//78 - vyroba lehkeho krumpace  tag: no_vyr_lp
 /////////////////////////////////////////////////////////////////////////////////////
 //85 - vyber hl. mat       tag: no_men_hlmat
 //86 - vyber vedl.mat      tag: no_men_vemat
@@ -117,7 +119,7 @@ object no_vzataItem = GetInventoryDisturbItem();
 
 
 ///doplnena perzistence 5.5.2014
-                DeleteAllInContainer(OBJECT_SELF); //smazu vse z kontejneru
+               // DeleteAllInContainer(OBJECT_SELF); //smazu vse z kontejneru
 
 
 ///////////////////// kdyz se jedna o vec, co se ma vyrabet//////////////////////
@@ -148,6 +150,8 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_ka"),"Vyroba katany"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_ra"),"Vyroba rapiru"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_sc"),"Vyroba scimitaru"));
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_y1"),"Vyroba rtutoveho obriho mece"));
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_y2"),"Vyroba rtutoveho dlouheho mece"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_zpet"),"Zpet"));
 DelayCommand(0.1,SetLocalInt(OBJECT_SELF,"no_menu",1));
 } //////////////////////////////////////////////
@@ -164,6 +168,7 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_tr"),"Vyroba tridentu"));
 //24 - vyroba hole         tag: no_vyr_hu
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_hu"),"Vyroba hole"));
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_ss"),"Vyroba jednorucniho kopi"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_zpet"),"Zpet"));
 SetLocalInt(OBJECT_SELF,"no_menu",2);
 } //////////////////////////////////////////////
@@ -241,9 +246,9 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_x6"),"Vyroba sap"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_x7"),"Vyroba obourucniho scimitaru"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_x8"),"Vyroba tezkeho palcatu"));
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_y1"),"Vyroba rtutoveho obriho mece"));
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_y2"),"Vyroba rtutoveho dlouheho mece"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_y3"),"Vyroba maugova dvojiteho mece"));
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_hp"),"Vyroba krumpace"));
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_lp"),"Vyroba lehkeho krupace"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_zpet"),"Zpet"));
 SetLocalInt(OBJECT_SELF,"no_menu",7);
 } //////////////////////////////////////////
@@ -361,7 +366,6 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_visu
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_visual_delete"),"Odstranit pridany grafickyefekt"));
 //konec barvicek
 
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vzhled_puvo"),"Puvodni vzhled"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vzhled_zapa"),"Zapamatovat vzhled"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_zpet"),"Zpet"));
 SetLocalInt(OBJECT_SELF,"no_menu",120);
@@ -581,7 +585,25 @@ no_reopen(no_oPC);
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_cepel"),"Zpet")); //pridame tlacitko zpet
 FloatingTextStringOnCreature("Vyroba scimitaru",no_oPC,FALSE );
 SetLocalInt(OBJECT_SELF,"no_menu",17);
-} //////////////////////////////////////////////
+}
+//18 - vyroba rt.obri mec  tag: no_vyr_y1
+if (GetTag(no_vzataItem) == "no_vyr_y1" ) {
+no_znicit(OBJECT_SELF); //znicime vsechny prepinace
+no_znicit(no_oPC);
+no_reopen(no_oPC);
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_cepel"),"Zpet")); //pridame tlacitko zpet
+FloatingTextStringOnCreature("Vyroba rtutoveho obriho mece",no_oPC,FALSE );
+SetLocalInt(OBJECT_SELF,"no_menu",18);
+}
+//19 - vyroba rtut dlouhy  tag: no_vyr_y2
+if (GetTag(no_vzataItem) == "no_vyr_y2" ) {
+no_znicit(OBJECT_SELF); //znicime vsechny prepinace
+no_znicit(no_oPC);
+no_reopen(no_oPC);
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_cepel"),"Zpet")); //pridame tlacitko zpet
+FloatingTextStringOnCreature("Vyroba rtutoveho dlouheho mece",no_oPC,FALSE );
+SetLocalInt(OBJECT_SELF,"no_menu",19);
+}//////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 if (GetTag(no_vzataItem) == "no_vyr_ha" ) {
 no_znicit(OBJECT_SELF); //znicime vsechny prepinace
@@ -628,6 +650,16 @@ FloatingTextStringOnCreature("Vyroba hole",no_oPC,FALSE );
 SetLocalInt(OBJECT_SELF,"no_menu",24);
 }
 ///////////////////////////////////////////////////////////
+//// vyroba jednorucniho kopi
+if (GetTag(no_vzataItem) == "no_vyr_ss" ) {
+no_znicit(OBJECT_SELF); //znicime vsechny prepinace
+no_znicit(no_oPC);
+no_reopen(no_oPC);
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_drevc"),"Zpet")); //pridame tlacitko zpet
+FloatingTextStringOnCreature("Vyroba jednorucniho kopi",no_oPC,FALSE );
+SetLocalInt(OBJECT_SELF,"no_menu",25);
+}
+//////////////////////////////////////////////////////////////
 if (GetTag(no_vzataItem) == "no_vyr_bc" ) {
 no_znicit(OBJECT_SELF); //znicime vsechny prepinace
 no_znicit(no_oPC);
@@ -863,22 +895,22 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_
 FloatingTextStringOnCreature("Vyroba tezkeho palcatu",no_oPC,FALSE );
 SetLocalInt(OBJECT_SELF,"no_menu",76);
 }
-//77 - vyroba rt.obri mec  tag: no_vyr_y1
-if (GetTag(no_vzataItem) == "no_vyr_y1" ) {
+//77 - vyroba krumpac.   tag: no_vyr_hp
+if (GetTag(no_vzataItem) == "no_vyr_hp" ) {
 no_znicit(OBJECT_SELF); //znicime vsechny prepinace
 no_znicit(no_oPC);
 no_reopen(no_oPC);
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_speci"),"Zpet")); //pridame tlacitko zpet
-FloatingTextStringOnCreature("Vyroba rtutoveho obriho mece",no_oPC,FALSE );
+FloatingTextStringOnCreature("Vyroba krumpace",no_oPC,FALSE );
 SetLocalInt(OBJECT_SELF,"no_menu",77);
 }
-//78 - vyroba rtut dlouhy  tag: no_vyr_y2
-if (GetTag(no_vzataItem) == "no_vyr_y2" ) {
+//78 - vyroba lehky krumpac   tag: no_vyr_lp
+if (GetTag(no_vzataItem) == "no_vyr_lp" ) {
 no_znicit(OBJECT_SELF); //znicime vsechny prepinace
 no_znicit(no_oPC);
 no_reopen(no_oPC);
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_speci"),"Zpet")); //pridame tlacitko zpet
-FloatingTextStringOnCreature("Vyroba rtutoveho dlouheho mece",no_oPC,FALSE );
+FloatingTextStringOnCreature("Vyroba tezkeho palcatu",no_oPC,FALSE );
 SetLocalInt(OBJECT_SELF,"no_menu",78);
 }
 //79 - vyroba maug dv. mec tag: no_vyr_y3
@@ -890,9 +922,24 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_
 FloatingTextStringOnCreature("Vyroba maugova dvojiteho mece",no_oPC,FALSE );
 SetLocalInt(OBJECT_SELF,"no_menu",79);
 }
-
-
-
+////77 - vyroba krumpace
+if (GetTag(no_vzataItem) == "no_vyr_hp" ) {
+no_znicit(OBJECT_SELF); //znicime vsechny prepinace
+no_znicit(no_oPC);
+no_reopen(no_oPC);
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_speci"),"Zpet")); //pridame tlacitko zpet
+FloatingTextStringOnCreature("Vyroba krumpac",no_oPC,FALSE );
+SetLocalInt(OBJECT_SELF,"no_menu",77);
+}
+////78- vyroba lehky krumpac
+if (GetTag(no_vzataItem) == "no_vyr_lp" ) {
+no_znicit(OBJECT_SELF); //znicime vsechny prepinace
+no_znicit(no_oPC);
+no_reopen(no_oPC);
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_speci"),"Zpet")); //pridame tlacitko zpet
+FloatingTextStringOnCreature("Vyroba lehky krumpac",no_oPC,FALSE );
+SetLocalInt(OBJECT_SELF,"no_menu",78);
+}
 
 ///////////////////////////////////////////////////////////
 if (GetTag(no_vzataItem) == "no_men_hlmat" ) {
@@ -910,7 +957,7 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_pla"),"platina")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_zla"),"zlato")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_zel"),"zelezo")); //pridame tlacitko zpet
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_bro"),"bronz")); //pridame tlacitko zpet
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_bro"),"vermajl")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_med"),"med")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_cin"),"cin")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_mater"),"Zpet")); //pridame tlacitko zpet
@@ -934,7 +981,7 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_pla"),"platina")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_zla"),"zlato")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_zel"),"zelezo")); //pridame tlacitko zpet
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_bro"),"bronz")); //pridame tlacitko zpet
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_bro"),"vermajl")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_med"),"med")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_cin"),"cin")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_mater"),"Zpet")); //pridame tlacitko zpet
@@ -1005,7 +1052,7 @@ if ( GetLocalInt(OBJECT_SELF,"no_menu") == 86 ) //hlavni material
 if (GetTag(no_vzataItem) == "no_men_bro" ) {
 no_znicit(no_oPC);
 no_reopen(no_oPC);
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_bro"),"bronz")); //pridame tlacitko zpet
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_bro"),"vermajl")); //pridame tlacitko zpet
 
 if ( GetLocalInt(OBJECT_SELF,"no_menu") == 85 ) //hlavni material
     { SetLocalInt(OBJECT_SELF,"no_hl_mat",3);
@@ -1206,7 +1253,7 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_
 ///doplnena perzistence 5.5.2014
 if (GetInventoryDisturbType()== INVENTORY_DISTURB_TYPE_ADDED) {
 
-Persist_SaveItemToDB(GetInventoryDisturbItem(), Persist_InitContainer(OBJECT_SELF));
+//Persist_SaveItemToDB(GetInventoryDisturbItem(), Persist_InitContainer(OBJECT_SELF));
 
 }
 

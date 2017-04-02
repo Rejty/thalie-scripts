@@ -34,9 +34,9 @@ void main()
 
     //Declare major varia
     object oTarget = GetSpellTargetObject();
-    effect  eV        = EffectVisualEffect(VFX_IMP_HEAD_ODD);
-    effect   eImpact     = EffectVisualEffect(VFX_FNF_DISPEL_DISJUNCTION);
-    spellsDispelMagic(oTarget, 30, eV, eImpact, FALSE,TRUE);
+//    effect  eV        = EffectVisualEffect(VFX_IMP_HEAD_ODD);
+//    effect   eImpact     = EffectVisualEffect(VFX_FNF_DISPEL_DISJUNCTION);
+//    spellsDispelMagic(oTarget, 30, eV, eImpact, FALSE,TRUE);
     int nSpell = GetSpellId();
 
     effect eVis = EffectVisualEffect(VFX_IMP_POLYMORPH);
@@ -79,6 +79,6 @@ void main()
     //Apply the VFX impact and effects
     AssignCommand(oTarget, ClearAllActions()); // prevents an exploit
     ApplyEffectToObject(DURATION_TYPE_INSTANT, eVis, oTarget);
-    ApplyEffectToObject(DURATION_TYPE_TEMPORARY, ePoly, oTarget, HoursToSeconds(nDuration));
+    ApplyEffectToObject(DURATION_TYPE_TEMPORARY, ePoly, oTarget, TurnsToSeconds(nDuration));
 }
 

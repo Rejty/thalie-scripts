@@ -117,7 +117,8 @@ void RunInfestImpact(object oTarget, object oCaster, int nSaveDC, int nMetaMagic
     {
          int nDC = GetLocalInt(oTarget,"XP2_L_SPELL_SAVE_DC_" + IntToString (SPELL_INFESTATION_OF_MAGGOTS));
 
-         if (!MySavingThrow(SAVING_THROW_FORT,oTarget,nSaveDC,SAVING_THROW_TYPE_DISEASE,OBJECT_SELF))
+         if ( !GetIsImmune(oTarget, IMMUNITY_TYPE_DISEASE, oCaster) &&
+              !MySavingThrow(SAVING_THROW_FORT,oTarget,nSaveDC,SAVING_THROW_TYPE_DISEASE,OBJECT_SELF))
          {
             //------------------------------------------------------------------
             // Setup Ability Score Damage
@@ -159,7 +160,7 @@ void RunInfestImpact(object oTarget, object oCaster, int nSaveDC, int nMetaMagic
                      effect eKill = EffectDamage(GetCurrentHitPoints(oTarget)+1);
                      //Boss exception
                      if(GetIsBoss(oTarget))
-                       ApplyBossInstantKillDamage(oTarget, GetThalieCaster(OBJECT_SELF,oTarget,GetCasterLevel(OBJECT_SELF),FALSE));
+                       ApplyBossInstantKillDamage(oTarget, GetThalieCaster(OBJECT_SELF,oTarget,GetCasterLevel(OBJECT_SELF),FALSE),FALSE);
                      else
                        ApplyEffectToObject(DURATION_TYPE_INSTANT,eKill,oTarget);
                      effect eVfx = EffectVisualEffect(VFX_IMP_DEATH_L);

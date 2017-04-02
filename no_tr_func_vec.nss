@@ -6,9 +6,10 @@
 #include "no_nastcraft_ini"
 #include "ku_items_inc"
 #include "ku_persist_inc"
+#include "tc_functions"
 
 /////////////////////////////////////
-///  dela vsemozne sici vyrobky s tagama:
+///  dela vsemozne truhlarske vyrobky s tagama:
 ///
 ///  boty: no_tr_kr_01_02
 /// 01-kuze  02 pouzite drevo, 02 pouzity kov
@@ -20,7 +21,7 @@ string no_nazev;
 int no_DC;
 
 void SetToulecName(object oToulec,string sZkratkaTyp,int iDrevo, int iKov);
-//nastavenie mena pre tulce šípov/šipiek
+//nastavenie mena pre tulce Å¡Ã­pov/Å¡ipiek
 
 void no_zjistiobsah(string no_tagveci);
 //podle tagu veci zjisti kolik je sutru, jejich cislo a ulozi je na :
@@ -91,13 +92,13 @@ void no_xp_tr (object no_oPC, object no_pec);
 void no_xp_pridej_tetivu(object no_oPC, object no_pec);
 // prida jakemukoliv polotovaru kamen, ktery je zrovna hozeny do pece.
 void no_xp_krluk(object no_oPC, object no_pec, int no_druh_kuze);
-// vytvori polotovark botum.
+// vytvori polotovar kratkeho luku
 void no_xp_dlluk(object no_oPC, object no_pec, int no_druh_kuze);
-// vytvori polotovark rukavicim.
+// vytvori polotovar dlouheho luku
 void no_xp_mlkus(object no_oPC, object no_pec, int no_druh_kuze);
-// vytvori polotovark chranicum
+// vytvori polotovark male kuse
 void no_xp_vlkus(object no_oPC, object no_pec, int no_druh_kuze);
-// vytvori polotovark rukavicim.
+// vytvori polotovark velke kuse
 void no_xp_sipy(object no_oPC, object no_pec, int no_druh_kuze);
 // vytvori polotovar
 void no_xp_sipky(object no_oPC, object no_pec, int no_druh_kuze);
@@ -110,7 +111,7 @@ void no_xp_stit(object no_oPC, object no_pec, int no_druh_kuze, int no_druh_stit
 void no_pohybklikacu(object no_oPC, object no_pec);
 
 
-//nastavenie mena pre tulce šípov a šipiek
+//nastavenie mena pre tulce Å¡Ã­pov a Å¡ipiek
 /*
 Drevo 1 - 8
 Kov 1 - 12
@@ -151,7 +152,7 @@ case 5:
 sDrevo = "z Tisu";
 break;
 case 6:
-sDrevo = "z Jasanu";
+sDrevo = "z Jilmu";
 break;
 case 7:
 sDrevo = "z Zelezneho Dubu";
@@ -611,28 +612,15 @@ if (no_tr_debug == TRUE) SendMessageToPC(no_oPC,"vysledna cena = " + FloatToStri
 
 }   //konec no_udelejcenu
 
-
-
 void no_vynikajicikus(object no_Item)
 {
-
-
-int no_random = d100();
-
-if  (GetIsDM(no_oPC)== TRUE) no_random = no_random -50;//DM maji vetsi sanci vyjimecneho kusu
+int no_random = d100() - TC_getLevel(no_oPC,TC_truhlar);
 if (no_random < (TC_dej_vlastnost(TC_truhlar,no_oPC)/4+1) ) {
-////5% sance, ze se prida neco vynikajiciho !!
-FloatingTextStringOnCreature("podarilo se ti vyrobit vyjimecny kus !", no_oPC,TRUE);
+////sance vroby vyjimecneho kusu stoupa s lvlem craftera
+if  (GetIsDM(no_oPC)== TRUE) no_random = no_random -50;//DM maji vetsi sanci vyjimecneho kusu
+FloatingTextStringOnCreature("Podarilo se ti vyrobit vyjimecny kus !", no_oPC,TRUE);
 
-
-
-FloatingTextStringOnCreature("podarilo se ti vyrobit vyjimecny kus !", no_oPC,TRUE);
-
-///dodelano 9_7_2014: vyjimecne kusy zavisle na lvlu craftera.
-
-//int no_level = TC_getLevel(no_oPC,TC_zlatnik);  // TC kovar = 33
-
-no_random = d4() + TC_getLevel(no_oPC,TC_zlatnik);
+no_random = Random(22)+1;
 
 //if ((GetLocalString(OBJECT_SELF,"no_druh_vyrobku") != "si") &  (GetLocalString(OBJECT_SELF,"no_druh_vyrobku") != "sp") )
 //{
@@ -646,54 +634,54 @@ switch (no_random)  {
 case 1: {
                   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonusVsRace(IP_CONST_RACIALTYPE_DRAGON,3+d4() ),no_Item);
                     AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_APPRAISE,2),no_Item);
-                                    SetName(no_Item,GetName(no_Item) + "  'Obchodnik'");
+                    SetName(no_Item,GetName(no_Item) + "  'Obchodnik'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 100);
                   break;}
 case 2: {
-                  //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonusVsRace(IP_CONST_RACIALTYPE_UNDEAD,d6()),no_Item);
-                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_HEAL,2),no_Item);
-
-                                    SetName(no_Item,GetName(no_Item) + "  'Lecitel'");
-                  SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 100);
+                  itemproperty no_ip = ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_ELECTRICAL,d2());
+                  AddItemProperty(DURATION_TYPE_PERMANENT,no_ip,no_Item);
+                  SetName(no_Item,GetName(no_Item) + "  'Uzemnovac'");
+                  SetLocalInt(no_Item,"tc_cena",GetLocalInt(no_Item,"tc_cena")+ 100);
                   break;}
 case 3: {
                    AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_HEAL,2),no_Item);
-                                    SetName(no_Item,GetName(no_Item) + "  'Smrtak'");
+                                    SetName(no_Item,GetName(no_Item) + "  'Lecitel'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 100);
                   break;}
 case 4: {
-                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_HEAL,2),no_Item);
-                                    SetName(no_Item,GetName(no_Item) + "  'Antijed'");
-                  SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 100);
+                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,2),no_Item);
+                                    SetName(no_Item,GetName(no_Item) + "  'Pevnestuj'");
+                  SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 200);
                   break;}
 case 5: {
-                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_NEGATIVE,d2() ),no_Item);
-                                    SetName(no_Item,GetName(no_Item) + "  'Pozitivum'");
-                  SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 100);
+                  itemproperty no_ip = ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_ACID,d2());
+                  AddItemProperty(DURATION_TYPE_PERMANENT,no_ip,no_Item);
+                  SetName(no_Item,GetName(no_Item) + "  'Kyselostit'");
                   break;}
+
 case 6: {
-                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonusVsRace(IP_CONST_RACIALTYPE_DRAGON,3+d4() ),no_Item);
-                                   SetName(no_Item,GetName(no_Item) + "  'Hromosvod'");
-                  SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 100);
+                   itemproperty no_ip = ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_COLD,d2());
+                  AddItemProperty(DURATION_TYPE_PERMANENT,no_ip,no_Item);
+                  SetName(no_Item,GetName(no_Item) + "  'Chladak'");
                   break;}
 case 7: {
-                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_HEAL,2),no_Item);
-                                    SetName(no_Item,GetName(no_Item) + "  'Tvrda hlava'");
-                  SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 100);
-                  break;}
-case 8: {
                    AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_LORE,2),no_Item);
                                     SetName(no_Item,GetName(no_Item) + "  'Poznavac'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
-case 9: {
+case 8: {
                    AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PERFORM,2),no_Item);
                                     SetName(no_Item,GetName(no_Item) + "  'Barduv stit'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
-case 10: {
-                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_LISTEN,2),no_Item);
-                                    SetName(no_Item,GetName(no_Item) + "  'Zvukovy stit'");
+case 9: {
+                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrow(IP_CONST_SAVEBASETYPE_FORTITUDE,1),no_Item);
+                                    SetName(no_Item,GetName(no_Item) + "  'Drtikost'");
+                  SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
+                  break;}
+
+case 10: {         AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_LISTEN,2),no_Item);
+                     SetName(no_Item,GetName(no_Item) + "  'Zvukovy stit'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
 case 11: {
@@ -702,70 +690,61 @@ case 11: {
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
 case 12: {
-                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonusVsRace(IP_CONST_RACIALTYPE_UNDEAD,d6()),no_Item);
-                                    SetName(no_Item,GetName(no_Item) + "  'Mrtvosmrt'");
-                  SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
-                  break;}
-case 13: {
                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_DIVINE,d2() ),no_Item);
                                     SetName(no_Item,GetName(no_Item) + "  'Vyvolavacuv stit'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
-case 14: {
+case 13: {
                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_FIRE,d2() ),no_Item);
                                     SetName(no_Item,GetName(no_Item) + "  'Ohnivy stit'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
-case 15: {
+case 14: {
                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_POISON,d2() ),no_Item);
                                     SetName(no_Item,GetName(no_Item) + "  'Protijedovy stit'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
-case 16: {
+case 15: {
                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_FEAR,d2() ),no_Item);
                                     SetName(no_Item,GetName(no_Item) + "  'Strachoprdel'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
-case 17: {
+case 16: {
                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_NEGATIVE,d2() ),no_Item);
                                     SetName(no_Item,GetName(no_Item) + "  'Negativni stit'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
-case 18: {
+case 17: {
                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_POSITIVE,d2() ),no_Item);
                                     SetName(no_Item,GetName(no_Item) + "  'Positivni stit'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
-case 19: {
+case 18: {
                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_SONIC,d2() ),no_Item);
                                     SetName(no_Item,GetName(no_Item) + "  'Zvukovy stit'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
-case 20: {
+case 19: {
                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_DEATH,d2() ),no_Item);
                                     SetName(no_Item,GetName(no_Item) + "  'Oddalovac smrti'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
-case 21: {
+case 20: {
                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_MINDAFFECTING,d2() ),no_Item);
                                     SetName(no_Item,GetName(no_Item) + "  'Silna mysl'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
-case 22: {
+case 21: {
                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrow(IP_CONST_SAVEBASETYPE_WILL,1),no_Item);
-                                    SetName(no_Item,GetName(no_Item) + "  'Sila!'");
+                                    SetName(no_Item,GetName(no_Item) + "  'Sila'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
-case 23: {
+case 22: {
                   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrow(IP_CONST_SAVEBASETYPE_REFLEX,1),no_Item);
                                     SetName(no_Item,GetName(no_Item) + "  'Uhybac'");
                   SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
                   break;}
-case 24: {
-                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrow(IP_CONST_SAVEBASETYPE_FORTITUDE,1),no_Item);
-                                    SetName(no_Item,GetName(no_Item) + "  'Drtikost'");
-                  SetLocalFloat(no_Item,"tc_cena",GetLocalFloat(no_Item,"tc_cena")+ 150);
-                  break;}
+
        }  //konec switche
        //}//if stity
 
@@ -842,36 +821,29 @@ void no_krluk(object no_pec)
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
-                    case 2:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 2:  {
                                  break;  }
-                    case 3:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 3:  {
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 4:  {
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
+                                 break;  }
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
+                                 break;  }
+                    case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
                                  break;  }
-                    case 7:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
                                  break;  }
-                    case 8:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 10: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
                                  break;  }
-                    case 9:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
-                                 break;  }
-                    case 10: {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
-                                 break;  }
-                    case 11: {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
 
                                  break;  }
@@ -889,19 +861,16 @@ void no_krluk(object no_pec)
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
-                    case 2:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(3),no_Item);
+                    case 2:  {
                                  break;  }
-                    case 3:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
+                    case 3:  {
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
+                                 break;  }
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
-                                 break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
@@ -939,19 +908,16 @@ void no_krluk(object no_pec)
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
-                    case 2:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(3),no_Item);
+                    case 2:  {
                                  break;  }
-                    case 3:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
+                    case 3:  {
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
@@ -987,21 +953,18 @@ void no_krluk(object no_pec)
                //mahagon + no_kov_luku
                no_Item=CreateItemOnObject("no_tr_kr_04",no_oPC,1,"no_tr_kr_04_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
@@ -1037,21 +1000,18 @@ void no_krluk(object no_pec)
                //tis + no_kov_luku
                no_Item=CreateItemOnObject("no_tr_kr_05",no_oPC,1,"no_tr_kr_05_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
+                                 break;  }
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
-                                break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
@@ -1084,24 +1044,21 @@ void no_krluk(object no_pec)
                no_vynikajicikus(no_Item);
                break; }
           case 6:   {
-               //jasen + no_kov_luku
+               //jilm + no_kov_luku
                no_Item=CreateItemOnObject("no_tr_kr_06",no_oPC,1,"no_tr_kr_06_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
@@ -1134,7 +1091,7 @@ void no_krluk(object no_pec)
                no_vynikajicikus(no_Item);
                break; }
           case 7:   {
-               //zelezny dub+ + no_kov_luku
+               //zelezny dub+ + no_kov_krluku
                no_Item=CreateItemOnObject("no_tr_kr_07",no_oPC,1,"no_tr_kr_07_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
@@ -1143,20 +1100,17 @@ void no_krluk(object no_pec)
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
+                                 break;  }
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
-                                 break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(3),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(2),no_Item);
                                  break;  }
                     case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
@@ -1184,7 +1138,7 @@ void no_krluk(object no_pec)
                no_vynikajicikus(no_Item);
                break; }
           case 8:   {
-               //prastary dub + no_kov_luku
+               //prastary dub + no_kov_krluku
                no_Item=CreateItemOnObject("no_tr_kr_08",no_oPC,1,"no_tr_kr_08_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
@@ -1193,16 +1147,13 @@ void no_krluk(object no_pec)
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
-                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
@@ -1238,47 +1189,40 @@ void no_krluk(object no_pec)
 
 
 
-//////////dlouhej luk//////////
+//////////dlouhy luk//////////
 void no_dlluk(object no_pec )
 {
      //zarizeni do int no_pouzita_kuze  no_prvnisutr no_druhysutr no_pocetsutru no_druh_vyrobku
      switch (GetLocalInt(OBJECT_SELF,"no_pouzite_drevo")){
           case 1:   {
-               //vrba + no_kov_luku
+               //vrba + no_kov_dlouheholuku
                no_Item=CreateItemOnObject("no_tr_dl_01",no_oPC,1,"no_tr_dl_01_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
-                    case 2:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 2:  {
                                  break;  }
-                    case 3:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 3:  {
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 4:  {
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
+                                 break;  }
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
+                                 break;  }
+                    case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  break;  }
-                    case 7:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  break;  }
-                    case 8:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 10: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  break;  }
-                    case 9:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
-                                 break;  }
-                    case 10: {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
-                                 break;  }
-                    case 11: {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
 
                                  break;  }
@@ -1291,24 +1235,21 @@ void no_dlluk(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 2:   {
-               //orech + no_kov_luku
+               //orech + no_kov_dlouhyluku
                no_Item=CreateItemOnObject("no_tr_dl_02",no_oPC,1,"no_tr_dl_02_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
-                    case 2:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(3),no_Item);
+                    case 2:  {
                                  break;  }
-                    case 3:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
+                    case 3:  {
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
+                                 break;  }
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
-                                 break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d4),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d4),no_Item);
@@ -1341,24 +1282,21 @@ void no_dlluk(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 3:   {
-               //dub + no_kov_luku
+               //dub + no_kov_dlouhyluku
                no_Item=CreateItemOnObject("no_tr_dl_03",no_oPC,1,"no_tr_dl_03_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
-                    case 2:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(3),no_Item);
+                    case 2:  {
                                  break;  }
-                    case 3:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
+                    case 3:  {
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
@@ -1391,24 +1329,21 @@ void no_dlluk(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 4:   {
-               //mahagon + no_kov_luku
+               //mahagon + no_kov_dlouhyluku
                no_Item=CreateItemOnObject("no_tr_dl_04",no_oPC,1,"no_tr_dl_04_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
@@ -1441,24 +1376,21 @@ void no_dlluk(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 5:   {
-               //tis + no_kov_luku
+               //tis + no_kov_dlouhyluku
                no_Item=CreateItemOnObject("no_tr_dl_05",no_oPC,1,"no_tr_dl_05_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
+                                 break;  }
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
-                                break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
@@ -1491,24 +1423,21 @@ void no_dlluk(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 6:   {
-               //jasen + no_kov_luku
+               //jilm + no_kov_dlouheholuku
                no_Item=CreateItemOnObject("no_tr_dl_06",no_oPC,1,"no_tr_dl_06_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d8),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d8),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d8),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d8),no_Item);
@@ -1541,24 +1470,21 @@ void no_dlluk(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 7:   {
-               //zelezny dub+ + no_kov_luku
+               //zelezny dub+ + no_kov_dlouhyluk
                no_Item=CreateItemOnObject("no_tr_dl_07",no_oPC,1,"no_tr_dl_07_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
+                                 break;  }
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d8),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2d4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
-                                 break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2d4),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2d4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2d4),no_Item);
@@ -1581,7 +1507,7 @@ void no_dlluk(object no_pec )
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(5),no_Item);
                                  break;  }
-                    case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
+                    case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2d4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(5),no_Item);
                                  break;  }
@@ -1591,7 +1517,7 @@ void no_dlluk(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 8:   {
-               //prastary dub + no_kov_luku
+               //prastary dub + no_kov_dlouhyluk
                no_Item=CreateItemOnObject("no_tr_dl_08",no_oPC,1,"no_tr_dl_08_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
@@ -1600,24 +1526,21 @@ void no_dlluk(object no_pec )
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_5),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(5),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2d4),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_5),no_Item);
-                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(5),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_5),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_5),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(6),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(5),no_Item);
                                  break;  }
                     case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_5),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(6),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(5),no_Item);
                                  break;  }
                     case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_5),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
@@ -1651,47 +1574,38 @@ void no_mlkus(object no_pec )
      //zarizeni do int no_pouzita_kuze  no_prvnisutr no_druhysutr no_pocetsutru no_druh_vyrobku
      switch (GetLocalInt(OBJECT_SELF,"no_pouzite_drevo")){
           case 1:   {
-               //vrba + no_kov_luku
+               //vrba + no_kov_malakus
                no_Item=CreateItemOnObject("no_tr_mk_01",no_oPC,1,"no_tr_mk_01_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
-                    case 2:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 2:  {
                                  break;  }
-                    case 3:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 3:  {
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 4:  {
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
+                                 break;  }
+                    case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  break;  }
-                    case 7:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  break;  }
-                    case 8:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  break;  }
-                    case 9:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 10: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  break;  }
-                    case 10: {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
-                                 break;  }
-                    case 11: {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
-
                                  break;  }
                     case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  break;  }
                     }//konec vnitrniho switche
                no_udelejjmeno(no_Item);
@@ -1699,33 +1613,30 @@ void no_mlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 2:   {
-               //orech + no_kov_luku
+               //orech + no_kov_malakus
                no_Item=CreateItemOnObject("no_tr_mk_02",no_oPC,1,"no_tr_mk_02_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
-                    case 2:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(3),no_Item);
+                    case 2:  {
                                  break;  }
-                    case 3:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
+                    case 3:  {
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
+                                 break;  }
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
-                                 break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(3),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  break;  }
                     case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(3),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  break;  }
                     case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
@@ -1749,24 +1660,21 @@ void no_mlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 3:   {
-               //dub + no_kov_luku
+               //dub + no_kov_malakus
                no_Item=CreateItemOnObject("no_tr_mk_03",no_oPC,1,"no_tr_mk_03_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
-                    case 2:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(3),no_Item);
+                    case 2:  {
                                  break;  }
-                    case 3:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
+                    case 3:  {
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
@@ -1799,24 +1707,21 @@ void no_mlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 4:   {
-               //mahagon + no_kov_luku
+               //mahagon + no_kov_malakus
                no_Item=CreateItemOnObject("no_tr_mk_04",no_oPC,1,"no_tr_mk_04_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
@@ -1849,33 +1754,30 @@ void no_mlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 5:   {
-               //tis + no_kov_luku
+               //tis + no_kov_malakus
                no_Item=CreateItemOnObject("no_tr_mk_05",no_oPC,1,"no_tr_mk_05_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                 break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(3),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(2),no_Item);
                                  break;  }
                     case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(4),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(3),no_Item);
                                  break;  }
                     case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
@@ -1899,24 +1801,21 @@ void no_mlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 6:   {
-               //jasen + no_kov_luku
+               //jilm + no_kov_malakus
                no_Item=CreateItemOnObject("no_tr_mk_06",no_oPC,1,"no_tr_mk_06_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_5),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_5),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_5),no_Item);
@@ -1949,48 +1848,45 @@ void no_mlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 7:   {
-               //zelezny dub+ + no_kov_luku
+               //zelezny dub+ + no_kov_malakus
                no_Item=CreateItemOnObject("no_tr_mk_07",no_oPC,1,"no_tr_mk_07_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
+                                 break;  }
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_6),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_6),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_6),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
-                                 break;  }
-                    case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_6),no_Item);
+                    case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(4),no_Item);
                                  break;  }
-                    case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_6),no_Item);
+                    case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(5),no_Item);
                                  break;  }
-                    case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_6),no_Item);
+                    case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(5),no_Item);
                                  break;  }
-                    case 10: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_6),no_Item);
+                    case 10: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(5),no_Item);
                                  break;  }
-                    case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_6),no_Item);
+                    case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(5),no_Item);
                                  break;  }
-                    case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_6),no_Item);
+                    case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(5),no_Item);
                                  break;  }
                     }//konec vnitrniho switche
@@ -1999,7 +1895,7 @@ void no_mlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 8:   {
-               //prastary dub + no_kov_luku
+               //prastary dub + no_kov_malakus
                no_Item=CreateItemOnObject("no_tr_mk_08",no_oPC,1,"no_tr_mk_08_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
@@ -2008,39 +1904,36 @@ void no_mlkus(object no_pec )
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(5),no_Item);
-                                 break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
-                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(5),no_Item);
-                                 break;  }
-                    case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(6),no_Item);
                                  break;  }
-                    case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_7),no_Item);
+                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
+                                 break;  }
+                    case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_7),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(6),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(5),no_Item);
                                  break;  }
-                    case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(6),no_Item);
+                    case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_7),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3+d2()),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(5),no_Item);
                                  break;  }
-                    case 10: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
+                    case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_7),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3+d2()),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(6),no_Item);
                                  break;  }
-                    case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
+                    case 10: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_7),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3+d2()),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(6),no_Item);
+                                 break;  }
+                    case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_7),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(6),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3+d2()),no_Item);
                                  break;  }
                     case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(5),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_7),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(6),no_Item);
                                  break;  }
                     }//konec vnitrniho switche
@@ -2059,43 +1952,35 @@ void no_vlkus(object no_pec )
      // zarizeni do int no_pouzita_kuze  no_prvnisutr no_druhysutr no_pocetsutru no_druh_vyrobku
      switch (GetLocalInt(OBJECT_SELF,"no_pouzite_drevo")){
           case 1:   {
-               //vrba + no_kov_luku
+               //vrba + no_kov_velkekuse
                no_Item=CreateItemOnObject("no_tr_vk_01",no_oPC,1,"no_tr_vk_01_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
-                    case 2:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 2:  {
                                  break;  }
-                    case 3:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 3:  {
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 4:  {
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
+                                 break;  }
+                    case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  break;  }
-                    case 7:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  break;  }
-                    case 8:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  break;  }
-                    case 9:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 10: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  break;  }
-                    case 10: {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
+                    case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
-                                 break;  }
-                    case 11: {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(0),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
-
                                  break;  }
                     case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(1),no_Item);
@@ -2106,24 +1991,21 @@ void no_vlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 2:   {
-               //orech + no_kov_luku
+               //orech + no_kov_velkekuse
                no_Item=CreateItemOnObject("no_tr_vk_02",no_oPC,1,"no_tr_vk_02_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
-                    case 2:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(3),no_Item);
+                    case 2:  {
                                  break;  }
-                    case 3:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
+                    case 3:  {
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
+                                 break;  }
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
-                                 break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_3),no_Item);
@@ -2156,24 +2038,21 @@ void no_vlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 3:   {
-               //dub + no_kov_luku
+               //dub + no_kov_velkekuse
                no_Item=CreateItemOnObject("no_tr_vk_03",no_oPC,1,"no_tr_vk_03_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
-                    case 2:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(3),no_Item);
+                    case 2:  {
                                  break;  }
-                    case 3:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
+                    case 3:  {
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d6),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_4),no_Item);
@@ -2206,23 +2085,23 @@ void no_vlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 4:   {
-               //mahagon + no_kov_luku
+               //mahagon + no_kov_velkekuse
                no_Item=CreateItemOnObject("no_tr_vk_04",no_oPC,1,"no_tr_vk_04_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 4:  {
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
+                    case 5:  {
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d8),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 6:  {
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2d4),no_Item);
                                  break;  }
@@ -2256,23 +2135,23 @@ void no_vlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 5:   {
-               //tis + no_kov_luku
+               //tis + no_kov_velekkuse
                no_Item=CreateItemOnObject("no_tr_vk_05",no_oPC,1,"no_tr_vk_05_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(d2()),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
+                    case 4:  {
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
+                    case 5:  {
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_5),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                 break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 6:  {
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_1d12),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
@@ -2306,24 +2185,21 @@ void no_vlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 6:   {
-               //jasen + no_kov_luku
+               //jilm + no_kov_velkekuse
                no_Item=CreateItemOnObject("no_tr_vk_06",no_oPC,1,"no_tr_vk_06_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2d6),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_2d6),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_6),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_6),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_6),no_Item);
@@ -2356,24 +2232,21 @@ void no_vlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 7:   {
-               //zelezny dub+ + no_kov_luku
+               //zelezny dub+ + no_kov_velkekuse
                no_Item=CreateItemOnObject("no_tr_vk_07",no_oPC,1,"no_tr_vk_07_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
+                    case 1:  {
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2),no_Item);
+                                 break;  }
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_7),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_7),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
-                                 break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_8),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_8),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_8),no_Item);
@@ -2396,7 +2269,7 @@ void no_vlkus(object no_pec )
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(7),no_Item);
                                  break;  }
-                    case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(2+d2()),no_Item);
+                    case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_8),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMaxRangeStrengthMod(7),no_Item);
                                  break;  }
@@ -2406,7 +2279,7 @@ void no_vlkus(object no_pec )
                no_vynikajicikus(no_Item);
                break; }
           case 8:   {
-               //prastary dub + no_kov_luku
+               //prastary dub + no_kov_velkekuse
                no_Item=CreateItemOnObject("no_tr_vk_08",no_oPC,1,"no_tr_vk_08_" + GetLocalString(OBJECT_SELF,"no_kov_luku"));
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                     case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1),no_Item);
@@ -2415,16 +2288,13 @@ void no_vlkus(object no_pec )
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(1+d2()),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(3),no_Item);
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_9),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(5),no_Item);
+                    case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_9),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
                                  break;  }
-                    case 6:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackPenalty(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_10),no_Item);
-                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(5),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_10),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyMassiveCritical(IP_CONST_DAMAGEBONUS_10),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyAttackBonus(4),no_Item);
@@ -2469,11 +2339,11 @@ void no_sipy(object no_pec )
      int iKov = GetLocalInt(OBJECT_SELF,"no_kov_luku");
      switch (GetLocalInt(OBJECT_SELF,"no_pouzite_drevo")){
           case 1:   {
-               //vrba + no_kov_luku
+               //vrba + no_kov_sipu
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgp_5");
+                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgp_7");
                                  break;  }
-                    case 2:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgp_4");
+                    case 2:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgp_5");
                                  break;  }
                     case 3:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgp_3");
                                  break;  }
@@ -2501,9 +2371,9 @@ void no_sipy(object no_pec )
                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyCastSpell(IP_CONST_CASTSPELL_UNIQUE_POWER_SELF_ONLY,IP_CONST_CASTSPELL_NUMUSES_UNLIMITED_USE),no_Item);
                break; }
           case 2:   {
-               //orech + no_kov_luku
+               //orech + no_kov_sipu
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgp_5");
+                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgp_6");
                                  break;  }
                     case 2:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgp_4");
                                  break;  }
@@ -2621,7 +2491,7 @@ void no_sipy(object no_pec )
                                  break;  }
                     case 11: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_magic_3");
                                  break;  }
-                    case 12: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_magic_1d4");
+                    case 12: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_magic_1d6");
                                  break;  }
                }//konec vnitrniho switche
                SetToulecName(no_Item, sZkratkaTyp, iDrevo, iKov);
@@ -2637,38 +2507,6 @@ void no_sipy(object no_pec )
                                  break;  }
                     case 3:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgb_2");
                                  break;  }
-                    case 4:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgbpi_1d6");
-                                 break;  }
-                    case 5:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_acid_1d6");
-                                 break;  }
-                    case 6:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_cold_1d6");
-                                 break;  }
-                    case 7:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_elec_1d6");
-                                 break;  }
-                    case 8:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_fire_1d6");
-                                 break;  }
-                    case 9:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_stun_18");
-                                 break;  }
-                    case 10: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_divund_1d10");
-                                 break;  }
-                    case 11: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_magic_1d4");
-                                 break;  }
-                    case 12: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_magic_1d6");
-                                 break;  }
-               }//konec vnitrniho switche
-               SetToulecName(no_Item, sZkratkaTyp, iDrevo, iKov);
-               no_cenavyrobku(no_Item);
-               AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyCastSpell(IP_CONST_CASTSPELL_UNIQUE_POWER_SELF_ONLY,IP_CONST_CASTSPELL_NUMUSES_UNLIMITED_USE),no_Item);
-               break; }
-          case 7:   {
-               //zelezny dub + no_kov_luku
-               switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgp_1");
-                                 break;  }
-                    case 2:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgb_1");
-                                 break;  }
-                    case 3:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgb_3");
-                                 break;  }
                     case 4:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgbpi_1d8");
                                  break;  }
                     case 5:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_acid_1d8");
@@ -2681,7 +2519,7 @@ void no_sipy(object no_pec )
                                  break;  }
                     case 9:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_stun_20");
                                  break;  }
-                    case 10: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_divund_1d12");
+                    case 10: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_divund_1d10");
                                  break;  }
                     case 11: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_magic_1d6");
                                  break;  }
@@ -2692,12 +2530,12 @@ void no_sipy(object no_pec )
                no_cenavyrobku(no_Item);
                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyCastSpell(IP_CONST_CASTSPELL_UNIQUE_POWER_SELF_ONLY,IP_CONST_CASTSPELL_NUMUSES_UNLIMITED_USE),no_Item);
                break; }
-          case 8:   {
-               //prastary dub + no_kov_luku
+          case 7:   {
+               //zelezny dub + no_kov_luku
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_def_0");
+                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgp_1");
                                  break;  }
-                    case 2:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgb_2");
+                    case 2:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgb_3");
                                  break;  }
                     case 3:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgb_4");
                                  break;  }
@@ -2713,11 +2551,43 @@ void no_sipy(object no_pec )
                                  break;  }
                     case 9:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_stun_22");
                                  break;  }
-                    case 10: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_divund_2d8");
+                    case 10: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_divund_1d12");
                                  break;  }
                     case 11: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_magic_1d8");
                                  break;  }
                     case 12: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_magic_1d10");
+                                 break;  }
+               }//konec vnitrniho switche
+               SetToulecName(no_Item, sZkratkaTyp, iDrevo, iKov);
+               no_cenavyrobku(no_Item);
+               AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyCastSpell(IP_CONST_CASTSPELL_UNIQUE_POWER_SELF_ONLY,IP_CONST_CASTSPELL_NUMUSES_UNLIMITED_USE),no_Item);
+               break; }
+          case 8:   {
+               //prastary dub + no_kov_luku
+               switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
+                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_def_2");
+                                 break;  }
+                    case 2:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgb_4");
+                                 break;  }
+                    case 3:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgb_6");
+                                 break;  }
+                    case 4:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_dmgbpi_1d12");
+                                 break;  }
+                    case 5:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_acid_1d12");
+                                 break;  }
+                    case 6:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_cold_1d12");
+                                 break;  }
+                    case 7:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_elec_1d12");
+                                 break;  }
+                    case 8:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_fire_1d12");
+                                 break;  }
+                    case 9:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_stun_24");
+                                 break;  }
+                    case 10: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_divund_2d8");
+                                 break;  }
+                    case 11: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_magic_1d10");
+                                 break;  }
+                    case 12: {   no_Item=CreateItemOnObject("shjy_zaklad_sipy",no_oPC,1,"toulec_bow_magic_1d12");
                                  break;  }
                }//konec vnitrniho switche
                SetToulecName(no_Item, sZkratkaTyp, iDrevo, iKov);
@@ -2874,38 +2744,6 @@ void no_sipky(object no_pec )
                                  break;  }
                     case 3:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgb_1");
                                  break;  }
-                    case 4:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgbpi_1d4");
-                                 break;  }
-                    case 5:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_acid_1d4");
-                                 break;  }
-                    case 6:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_cold_1d4");
-                                 break;  }
-                    case 7:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_elec_1d4");
-                                 break;  }
-                    case 8:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_fire_1d4");
-                                 break;  }
-                    case 9:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_stun_16");
-                                 break;  }
-                    case 10: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_divund_1d8");
-                                 break;  }
-                    case 11: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_magic_3");
-                                 break;  }
-                    case 12: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_magic_1d4");
-                                 break;  }
-               }//konec vnitrniho switche
-               SetToulecName(no_Item, sZkratkaTyp, iDrevo, iKov);
-               no_cenavyrobku(no_Item);
-               AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyCastSpell(IP_CONST_CASTSPELL_UNIQUE_POWER_SELF_ONLY,IP_CONST_CASTSPELL_NUMUSES_UNLIMITED_USE),no_Item);
-               break; }
-          case 6:   {
-               //jilm + no_kov_luku
-               switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgp_2");
-                                 break;  }
-                    case 2:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_def_0");
-                                 break;  }
-                    case 3:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgb_2");
-                                 break;  }
                     case 4:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgbpi_1d6");
                                  break;  }
                     case 5:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_acid_1d6");
@@ -2920,7 +2758,7 @@ void no_sipky(object no_pec )
                                  break;  }
                     case 10: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_divund_1d10");
                                  break;  }
-                    case 11: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_magic_1d4");
+                    case 11: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_magic_3");
                                  break;  }
                     case 12: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_magic_1d6");
                                  break;  }
@@ -2929,12 +2767,12 @@ void no_sipky(object no_pec )
                no_cenavyrobku(no_Item);
                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyCastSpell(IP_CONST_CASTSPELL_UNIQUE_POWER_SELF_ONLY,IP_CONST_CASTSPELL_NUMUSES_UNLIMITED_USE),no_Item);
                break; }
-          case 7:   {
-               //zelezny dub + no_kov_luku
+          case 6:   {
+               //jilm + no_kov_luku
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgp_1");
+                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgp_2");
                                  break;  }
-                    case 2:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgb_1");
+                    case 2:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_def_0");
                                  break;  }
                     case 3:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgb_3");
                                  break;  }
@@ -2961,12 +2799,12 @@ void no_sipky(object no_pec )
                no_cenavyrobku(no_Item);
                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyCastSpell(IP_CONST_CASTSPELL_UNIQUE_POWER_SELF_ONLY,IP_CONST_CASTSPELL_NUMUSES_UNLIMITED_USE),no_Item);
                break; }
-          case 8:   {
-               //prastary dub + no_kov_luku
+          case 7:   {
+               //zelezny dub + no_kov_luku
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_def_0");
+                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgp_1");
                                  break;  }
-                    case 2:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgb_2");
+                    case 2:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgb_3");
                                  break;  }
                     case 3:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgb_4");
                                  break;  }
@@ -2982,11 +2820,43 @@ void no_sipky(object no_pec )
                                  break;  }
                     case 9:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_stun_22");
                                  break;  }
-                    case 10: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_divund_2d8");
+                    case 10: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_divund_1d12");
                                  break;  }
                     case 11: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_magic_1d8");
                                  break;  }
                     case 12: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_magic_1d10");
+                                 break;  }
+               }//konec vnitrniho switche
+               SetToulecName(no_Item, sZkratkaTyp, iDrevo, iKov);
+               no_cenavyrobku(no_Item);
+               AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyCastSpell(IP_CONST_CASTSPELL_UNIQUE_POWER_SELF_ONLY,IP_CONST_CASTSPELL_NUMUSES_UNLIMITED_USE),no_Item);
+               break; }
+          case 8:   {
+               //prastary dub + no_kov_luku
+               switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
+                    case 1:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_def_2");
+                                 break;  }
+                    case 2:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgb_4");
+                                 break;  }
+                    case 3:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgb_6");
+                                 break;  }
+                    case 4:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_dmgbpi_1d12");
+                                 break;  }
+                    case 5:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_acid_1d12");
+                                 break;  }
+                    case 6:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_cold_1d12");
+                                 break;  }
+                    case 7:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_elec_1d12");
+                                 break;  }
+                    case 8:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_fire_1d12");
+                                 break;  }
+                    case 9:  {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_stun_26");
+                                 break;  }
+                    case 10: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_divund_2d8");
+                                 break;  }
+                    case 11: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_magic_1d10");
+                                 break;  }
+                    case 12: {   no_Item=CreateItemOnObject("shjy_zaklad_sipk",no_oPC,1,"toulec_cro_magic_1d12");
                                  break;  }
                }//konec vnitrniho switche
                SetToulecName(no_Item, sZkratkaTyp, iDrevo, iKov);
@@ -2998,7 +2868,7 @@ void no_sipky(object no_pec )
 
 
 
-//////////stity 23 brezen//////////
+//////////stity 6. dubna edit Karolina//////////
 void no_stit(object no_pec, int no_druh_stitu)
 {
      if ( no_druh_stitu==1 ) {
@@ -3020,23 +2890,21 @@ void no_stit(object no_pec, int no_druh_stitu)
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
                                  break;  }
                     case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_ACID,IP_CONST_DAMAGERESIST_5),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
                     case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSpellResistance(IP_CONST_SPELLRESISTANCEBONUS_14),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
-                                 break;  }
+                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightReduction(IP_CONST_REDUCEDWEIGHT_10_PERCENT),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightReduction(IP_CONST_REDUCEDWEIGHT_40_PERCENT),no_Item);
 
                                  break;  }
                     case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(2),no_Item);
@@ -3048,11 +2916,9 @@ void no_stit(object no_pec, int no_druh_stitu)
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  break;  }
                     case 10: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_NEGATIVE,2),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,1),no_Item);
                                  break;  }
                     case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(1),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,2),no_Item);
                                  break;  }
                     case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,2),no_Item);
@@ -3069,32 +2935,29 @@ void no_stit(object no_pec, int no_druh_stitu)
                    case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  break;  }
-                    case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,1),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
+                    case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,2),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
                                  break;  }
                     case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,3),no_Item);
                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_ACID,IP_CONST_DAMAGERESIST_10),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
                     case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSpellResistance(IP_CONST_SPELLRESISTANCEBONUS_16),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightReduction(IP_CONST_REDUCEDWEIGHT_40_PERCENT),no_Item);
-
                                  break;  }
                     case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightIncrease(IP_CONST_WEIGHTINCREASE_5_LBS),no_Item);
-
                                  break;  }
                     case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonusVsDmgType(IP_CONST_DAMAGETYPE_PIERCING,3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
@@ -3108,7 +2971,7 @@ void no_stit(object no_pec, int no_druh_stitu)
                                  break;  }
                     case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_FIRE,2),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_FIRE,IP_CONST_DAMAGERESIST_5),no_Item);
 
                                  break;  }
                }//konec vnitrniho switche
@@ -3127,10 +2990,9 @@ void no_stit(object no_pec, int no_druh_stitu)
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,6),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(1),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
                                  break;  }
                     case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,3),no_Item);
@@ -3138,17 +3000,15 @@ void no_stit(object no_pec, int no_druh_stitu)
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
                     case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSpellResistance(IP_CONST_SPELLRESISTANCEBONUS_18),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightReduction(IP_CONST_REDUCEDWEIGHT_40_PERCENT),no_Item);
-
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightReduction(IP_CONST_REDUCEDWEIGHT_60_PERCENT),no_Item);
                                  break;  }
                     case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightIncrease(IP_CONST_WEIGHTINCREASE_10_LBS),no_Item);
-
                                  break;  }
                     case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonusVsDmgType(IP_CONST_DAMAGETYPE_PIERCING,4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
@@ -3162,7 +3022,7 @@ void no_stit(object no_pec, int no_druh_stitu)
                                  break;  }
                     case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_FIRE,3),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_FIRE,IP_CONST_DAMAGERESIST_5),no_Item);
 
                                  break;  }
                }//konec vnitrniho switche
@@ -3180,31 +3040,27 @@ void no_stit(object no_pec, int no_druh_stitu)
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,6),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(2),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,1),no_Item);
-
                                  break;  }
                     case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,2),no_Item);
                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_ACID,IP_CONST_DAMAGERESIST_15),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
-                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSpellResistance(IP_CONST_SPELLRESISTANCEBONUS_18),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSpellResistance(IP_CONST_SPELLRESISTANCEBONUS_20),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightReduction(IP_CONST_REDUCEDWEIGHT_40_PERCENT),no_Item);
-
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightReduction(IP_CONST_REDUCEDWEIGHT_60_PERCENT),no_Item);
                                  break;  }
                     case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightIncrease(IP_CONST_WEIGHTINCREASE_10_LBS),no_Item);
-
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightIncrease(IP_CONST_WEIGHTINCREASE_15_LBS),no_Item);
                                  break;  }
                     case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonusVsDmgType(IP_CONST_DAMAGETYPE_PIERCING,4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
@@ -3215,11 +3071,11 @@ void no_stit(object no_pec, int no_druh_stitu)
                                  break;  }
                     case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_COLD,2),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_COLD,IP_CONST_DAMAGERESIST_5),no_Item);
                                  break;  }
                     case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,6),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_FIRE,4),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_FIRE,IP_CONST_DAMAGERESIST_5),no_Item);
 
                                  break;  }
                }//konec vnitrniho switche
@@ -3230,7 +3086,7 @@ void no_stit(object no_pec, int no_druh_stitu)
           case 5:   {
                //tis + no_kov_luku
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
-                   case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,4),no_Item);
+                   case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,2),no_Item);
@@ -3238,13 +3094,11 @@ void no_stit(object no_pec, int no_druh_stitu)
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,1),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,8),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(2),no_Item);
+                    case 4:  {  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,1),no_Item);
-
                                  break;  }
                     case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,2),no_Item);
                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_ACID,IP_CONST_DAMAGERESIST_15),no_Item);
@@ -3255,14 +3109,12 @@ void no_stit(object no_pec, int no_druh_stitu)
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightReduction(IP_CONST_REDUCEDWEIGHT_40_PERCENT),no_Item);
-
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightReduction(IP_CONST_REDUCEDWEIGHT_60_PERCENT),no_Item);
                                  break;  }
                     case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightIncrease(IP_CONST_WEIGHTINCREASE_30_LBS),no_Item);
-
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightIncrease(IP_CONST_WEIGHTINCREASE_15_LBS),no_Item);
                                  break;  }
                     case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonusVsDmgType(IP_CONST_DAMAGETYPE_PIERCING,5),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
@@ -3273,7 +3125,7 @@ void no_stit(object no_pec, int no_druh_stitu)
                                  break;  }
                     case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_COLD,3),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_COLD,IP_CONST_DAMAGERESIST_5),no_Item);
                                  break;  }
                     case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,6),no_Item);
@@ -3297,46 +3149,40 @@ void no_stit(object no_pec, int no_druh_stitu)
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,8),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(3),no_Item);
+                    case 4:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,2),no_Item);
-
                                  break;  }
                     case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,1),no_Item);
                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_ACID,IP_CONST_DAMAGERESIST_20),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  break;  }
-                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSpellResistance(IP_CONST_SPELLRESISTANCEBONUS_20),no_Item);
+                    case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSpellResistance(IP_CONST_SPELLRESISTANCEBONUS_22),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightReduction(IP_CONST_REDUCEDWEIGHT_40_PERCENT),no_Item);
-
                                  break;  }
                     case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,2),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightIncrease(IP_CONST_WEIGHTINCREASE_30_LBS),no_Item);
-
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightIncrease(IP_CONST_WEIGHTINCREASE_15_LBS),no_Item);
                                  break;  }
                     case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonusVsDmgType(IP_CONST_DAMAGETYPE_PIERCING,5),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  break;  }
                     case 10: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_NEGATIVE,4),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,1),no_Item);
                                  break;  }
                     case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(3),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,6),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_COLD,4),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_COLD,IP_CONST_DAMAGERESIST_10),no_Item);
                                  break;  }
                     case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,8),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_FIRE,IP_CONST_DAMAGERESIST_5),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_FIRE,1),no_Item);
-                                 break;  }
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_FIRE,IP_CONST_DAMAGERESIST_10),no_Item);
+                                  break;  }
                }//konec vnitrniho switche
                no_udelejjmeno(no_Item);
                no_cenavyrobku(no_Item);
@@ -3346,20 +3192,17 @@ void no_stit(object no_pec, int no_druh_stitu)
                //zelezny dub + no_kov_luku
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                    case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,2),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
-                                 break;  }
-                    case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,2),no_Item);
+                                break;  }
+                    case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,1),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,2),no_Item);
                                  break;  }
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,10),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(3),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_25_PERCENT),no_Item);
+                    case 4:  {  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(3),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,2),no_Item);
-
                                  break;  }
                     case 5:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,1),no_Item);
                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_ACID,IP_CONST_DAMAGERESIST_20),no_Item);
@@ -3369,31 +3212,21 @@ void no_stit(object no_pec, int no_druh_stitu)
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(4),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightReduction(IP_CONST_REDUCEDWEIGHT_40_PERCENT),no_Item);
-
                                  break;  }
                     case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(5),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,2),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightIncrease(IP_CONST_WEIGHTINCREASE_50_LBS),no_Item);
-
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightIncrease(IP_CONST_WEIGHTINCREASE_30_LBS),no_Item);
                                  break;  }
                     case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonusVsDmgType(IP_CONST_DAMAGETYPE_PIERCING,6),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
-                                 break;  }
+                                break;  }
                     case 10: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_NEGATIVE,5),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,1),no_Item);
-                                 break;  }
+                                break;  }
                     case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(3),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,6),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_COLD,IP_CONST_DAMAGERESIST_5),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_COLD,IP_CONST_DAMAGERESIST_10),no_Item);
                                  break;  }
                     case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,8),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_FIRE,IP_CONST_DAMAGERESIST_5),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_FIRE,2),no_Item);
+                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_FIRE,IP_CONST_DAMAGERESIST_10),no_Item);
                                  break;  }
                }//konec vnitrniho switche
                no_udelejjmeno(no_Item);
@@ -3404,7 +3237,6 @@ void no_stit(object no_pec, int no_druh_stitu)
                //prastary dub + no_kov_luku
                switch (GetLocalInt(OBJECT_SELF,"no_kov_luku")) {
                    case 1:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,2),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  break;  }
                     case 2:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,1),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
@@ -3413,46 +3245,30 @@ void no_stit(object no_pec, int no_druh_stitu)
                     case 3:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,10),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  break;  }
-                    case 4:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,2),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(4),no_Item);
+                    case 4:  {  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(4),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_10_PERCENT),no_Item);
                                  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,3),no_Item);
-
                                  break;  }
-                    case 5:  {   //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,1),no_Item);
-                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_ACID,IP_CONST_DAMAGERESIST_20),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
-                                 break;  }
+                    case 5:  {  AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_ACID,IP_CONST_DAMAGERESIST_25),no_Item);
+                                break;  }
                     case 6:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSpellResistance(IP_CONST_SPELLRESISTANCEBONUS_24),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  break;  }
                     case 7:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(4),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightReduction(IP_CONST_REDUCEDWEIGHT_60_PERCENT),no_Item);
-
+                                AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightReduction(IP_CONST_REDUCEDWEIGHT_40_PERCENT),no_Item);
                                  break;  }
                     case 8:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(5),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,2),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightIncrease(IP_CONST_WEIGHTINCREASE_50_LBS),no_Item);
-
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAbility(IP_CONST_ABILITY_DEX,3),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyWeightIncrease(IP_CONST_WEIGHTINCREASE_30_LBS),no_Item);
                                  break;  }
                     case 9:  {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonusVsDmgType(IP_CONST_DAMAGETYPE_PIERCING,6),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
                                  break;  }
                     case 10: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_NEGATIVE,5),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,IP_CONST_DAMAGEVULNERABILITY_5_PERCENT),no_Item);
-                                 //AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDecreaseAC(IP_CONST_ACMODIFIERTYPE_SHIELD,1),no_Item);
                                  break;  }
                     case 11: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(4),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,8),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_COLD,IP_CONST_DAMAGERESIST_5),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_COLD,1),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_COLD,IP_CONST_DAMAGERESIST_10),no_Item);
                                  break;  }
                     case 12: {   AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(5),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_PARRY,10),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_FIRE,IP_CONST_DAMAGERESIST_5),no_Item);
-                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyBonusSavingThrowVsX(IP_CONST_SAVEVS_FIRE,3),no_Item);
+                                 AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyDamageResistance(IP_CONST_DAMAGETYPE_FIRE,IP_CONST_DAMAGERESIST_10),no_Item);
                                  break;  }
                }//konec vnitrniho switche
                no_udelejjmeno(no_Item);
@@ -4092,7 +3908,7 @@ if (no_hod <= no_chance ) {
 
     int no_obtiznost_vyrobku = no_DC+( 10*no_level );
 
-            if (no_obtiznost_vyrobku >=190) {
+/*            if (no_obtiznost_vyrobku >=190) {
             no_procenta = no_procenta + 0.1 ;}
             else if ((no_obtiznost_vyrobku <190)&(no_obtiznost_vyrobku>=180)) {
             no_procenta = no_procenta + 0.2 ;}
@@ -4131,7 +3947,9 @@ if (no_hod <= no_chance ) {
             else if ((no_obtiznost_vyrobku <20)&(no_obtiznost_vyrobku>=10)) {
             no_procenta = no_procenta+ Random(20)/10.0 +6.0;}
             else if (no_obtiznost_vyrobku <10) {
-            no_procenta = no_procenta + Random(20)/10.0 +10.0;}
+            no_procenta = no_procenta + Random(20)/10.0 +10.0;}*/
+
+            no_procenta = no_procenta + (TC_getProgressByDifficulty(no_obtiznost_vyrobku) / 10.0);
 
                           if  (GetIsDM(no_oPC)== TRUE) no_procenta = no_procenta + 50.0;
                           if (no_tr_debug == TRUE   )  no_procenta = no_procenta + 50.0;
@@ -4897,26 +4715,5 @@ switch (no_druh_kuze) {
         }//konec case
         }//konec, pokud se jedna o maly stit
 }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-void no_pohybklikacu(object no_oPC, object no_pec)
-// vytvori polotovar
-{    //tohel se spousti, jen kdyz existuje kov, takze jen overujeme formu.
-    SetCommandable(TRUE,no_oPC);
-
-    float vzdalenost = GetDistanceBetweenLocations(GetLocation(no_oPC),GetLocation(no_pec));
-    if (vzdalenost >= (GetLocalFloat(no_oPC,"no_pohybklikacu") -5.0) )
-    {//tzn. ze ten svinak nejak zablokoval pohyb... hajzl tak mu to zamknem :D
-     ActionDoCommand(SetLocked(OBJECT_SELF, FALSE));
-
-    AssignCommand(no_oPC, ActionPlayAnimation(ANIMATION_LOOPING_GET_LOW, 1.0, 3.0));
-     DelayCommand(60.0,ActionDoCommand(SetLocked(OBJECT_SELF, TRUE)) );
-    FloatingTextStringOnCreature("Nejak se to zamklo, asi sem nemel bugovat",no_oPC,FALSE );
-    }
-
-} // konec no_pohybklikacu
-
-
 
 

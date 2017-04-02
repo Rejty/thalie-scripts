@@ -142,7 +142,7 @@ int __getDigAmmount(int iResource) {
 
   switch(iResource) {
     // Coal
-    case CNR_RESOURCE_COAL: return 6+d10(2);
+    case CNR_RESOURCE_COAL: return 10+d10(2);
     // Metal
     case CNR_RESOURCE_TIN:
     case CNR_RESOURCE_COPPER:
@@ -409,8 +409,6 @@ void main()
   // Metal or mineral
   if(iResource <= CNR_RESOURCE_MAX_MINERAL) {
     iSkill = CnrGetPersistentInt(oPC,"iMiningSkill");
-    RemoveEffects(oPC);
-    CallEnemyCreatures(oPC);
     bMiningSkillType = TRUE;
   }
   // Wood
@@ -418,6 +416,9 @@ void main()
     iSkill = CnrGetPersistentInt(oPC,"iWoodCutSkill");
     bMiningSkillType = FALSE;
   }
+
+  RemoveEffects(oPC);
+  CallEnemyCreatures(oPC);
 
   int iDigChance = iSkill;
   // Weird skill override if skill is too low
@@ -521,8 +522,8 @@ void ReplaceSelf(object oSelf, string sAppearance) {
   int iAppearance = GetAppearanceType(oSelf);
   oTemp = CreateObject(OBJECT_TYPE_PLACEABLE,sAppearance,lSelf,FALSE);
   DestroyObject(oSelf,1.0);
-  AssignCommand(oTemp,DelayCommand(1200.0,CreateNew(lSelf, sResSelf, iAppearance, sTag)));
-  DestroyObject(oTemp,1230.0);
+  AssignCommand(oTemp,DelayCommand(5400.0,CreateNew(lSelf, sResSelf, iAppearance, sTag)));
+  DestroyObject(oTemp,5430.0);
   return;
 }
 

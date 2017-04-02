@@ -72,6 +72,14 @@ void spawn(object oPC){
      object oArea = OBJECT_SELF;
 
      if(!iSpawn && !iDisable_spawn){
+        // Safety for double spawn
+        if(GetLocalInt(oArea, "LOCK_SPAWN_IN_PROGRESS")) {
+          WriteTimestampedLogEntry("Spawn already in progress in progress in '"+GetName(oArea)+"' '"+GetTag(oArea)+"'");
+          return;
+        }
+        SetLocalInt(oArea, "LOCK_SPAWN_IN_PROGRESS",TRUE);
+        DelayCommand(2.0, DeleteLocalInt(oArea,"LOCK_SPAWN_IN_PROGRESS"));
+        WriteTimestampedLogEntry("Spawn start in '"+GetName(oArea)+"' '"+GetTag(oArea)+"'");
 
         //SpeakString(IntToString(pc_c), TALKVOLUME_SHOUT);
         float fSpawnDelay = 0.0;
@@ -161,18 +169,16 @@ void spawn(object oPC){
                     continue;
                 }
 
+                // Old group spawn
+                if (GetStringLeft(sTag, 7) == "LOCK_RA") {
+                  SetLocalString(oObject,"SPAWN_TYPE","GROUP");
+                }
+
                 // New spawn prototype
-                if(LOCK_ProcessSpawn(oObject, fSpawnDelay)) {
+                if(LOCK_ProcessSpawn(oObject, fSpawnDelay, oOverrrideFaction)) {
                     nNth++;
                     oObject = GetNearestObject(OBJECT_TYPE_WAYPOINT, oTarget, nNth);
                     fSpawnDelay += 0.02; // To define an interval between all spawns.
-                    continue;
-                }
-
-                if (GetStringLeft(sTag, 7) == "LOCK_RA"){
-                    LOCK_SpawnGroup(oObject,oOverrrideFaction);
-                    nNth++;
-                    oObject = GetNearestObject(OBJECT_TYPE_WAYPOINT, oTarget, nNth);
                     continue;
                 }
 
@@ -200,6 +206,7 @@ void spawn(object oPC){
             oObject = GetNearestObject(OBJECT_TYPE_WAYPOINT, oTarget, nNth);
         }
         SetLocalInt(OBJECT_SELF, "LOCK_SPAWN_ENTER", 1);
+        WriteTimestampedLogEntry("Spawned "+IntToString(FloatToInt(fSpawnDelay / 0.02))+" from "+IntToString(nNth)+" waypoints '"+GetName(oArea)+"' '"+GetTag(oArea)+"'");
      }
      // We confirm the spawn has been done.
      DelayCommand(5.0f, MakeAnimalFriends(oPC));
@@ -226,7 +233,7 @@ void main()
 
     // Only if the entering creature is a PC or DM.
     if (!(GetIsPC(oPC) || GetIsDMPossessed(oPC) || GetIsDM(oPC))) return;
-    
+
     if(Subraces_GetIsCharacterFromUnderdark(oPC ))
       SendMessageToPC(oPC,GetLocalString(OBJECT_SELF,"ph_hloubka"));
 
@@ -301,7 +308,7 @@ void main()
         {
             if( !GetIsDM(oPC) && (GetAppearanceType(oPC)!=APPEARANCE_TYPE_SPECTRE) )
                 DelayCommand(0.0f, ApplyDeadlandsEffects(oPC, oSoul));
-        }         
+        }
    }
    // Dismount in interior areas
    else if (!GetIsAreaExterior(OBJECT_SELF) && GetLocalInt(oSoul, "MOUNTED"))

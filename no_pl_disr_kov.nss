@@ -38,7 +38,7 @@ object no_vzataItem = GetInventoryDisturbItem();
 
 
 ///doplnena perzistence 5.5.2014
-Persist_DeleteItemFromDB(GetInventoryDisturbItem());
+//Persist_DeleteItemFromDB(GetInventoryDisturbItem());
 
 ///////////////////// kdyz se jedna o vec, co se ma vyrabet//////////////////////
 //string no_menu_tagveci = GetStringRight(GetTag(no_vzataItem),6);
@@ -54,51 +54,51 @@ SetLocalString (OBJECT_SELF,"no_menu",GetStringRight(GetTag(no_vzataItem),2) );
 
 
 
-/////////////////////////////1-NASTAVIT vyroba krouzkovky/////////////////////////////////
+/////////////////////////////Krouzkova kosile - zakladni obranne cislo 4/////////////////////////////////
 if (GetTag(no_vzataItem) == "no_vyr_krouz" ) {
 no_znicit(OBJECT_SELF); //znicime vsechny prepinace
 no_znicit(no_oPC);
 no_reopen(no_oPC);
-FloatingTextStringOnCreature("Vyroba krouzkove zbroje",no_oPC,FALSE );
+FloatingTextStringOnCreature("Vyroba krouzkove kosile",no_oPC,FALSE );
     no_reknimat(no_oPC);
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_zpet"),"Zpet"));
 DelayCommand(0.1,SetLocalInt(OBJECT_SELF,"no_menu",1));
 } //////////////////////////////////////////////
 
-/////////////////////////////2-NASTAVIT vyroba drevcovych zbrani/////////////////////////////////
+/////////////////////////////Hrudn pancir - Zakladni obranne cislo 5/////////////////////////////////
 if (GetTag(no_vzataItem) == "no_vyr_hrudn" ) {
 no_znicit(OBJECT_SELF); //znicime vsechny prepinace
 no_znicit(no_oPC);
 no_reopen(no_oPC);
-FloatingTextStringOnCreature("Vyroba destickove zbroje",no_oPC,FALSE );
+FloatingTextStringOnCreature("Vyroba hrudniho pancire",no_oPC,FALSE );
     no_reknimat(no_oPC);
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_zpet"),"Zpet"));
 SetLocalInt(OBJECT_SELF,"no_menu",2);
 } //////////////////////////////////////////////
 
-/////////////////////////////3-NASTAVIT exoticke zbrane/////////////////////////////////
+/////////////////////////////Destickova zbroj - zakladni obranne cislo 6/////////////////////////////////
 if (GetTag(no_vzataItem) == "no_vyr_desti" ) {
 no_znicit(OBJECT_SELF); //znicime vsechny prepinace
 no_znicit(no_oPC);
 no_reopen(no_oPC);
-FloatingTextStringOnCreature("Vyroba pancire",no_oPC,FALSE );
+FloatingTextStringOnCreature("Vyroba destikove zbroje",no_oPC,FALSE );
     no_reknimat(no_oPC);
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_zpet"),"Zpet"));
 SetLocalInt(OBJECT_SELF,"no_menu",3);
 } //////////////////////////////////////////////
 
-/////////////////////////////4-NASTAVIT vyroba voboustranych zbrani/////////////////////////////////
+/////////////////////////////Polovicni platova zbroj- zakladni obranne cislo 7/////////////////////////////////
 if (GetTag(no_vzataItem) == "no_vyr_pulpl" ) {
 no_znicit(OBJECT_SELF); //znicime vsechny prepinace
 no_znicit(no_oPC);
 no_reopen(no_oPC);
-FloatingTextStringOnCreature("Vyroba pulolovicni platove zbroje",no_oPC,FALSE );
+FloatingTextStringOnCreature("Vyroba polovicni platove zbroje",no_oPC,FALSE );
     no_reknimat(no_oPC);
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_zpet"),"Zpet"));
 SetLocalInt(OBJECT_SELF,"no_menu",4);
 } /////////////////////////////////////////////
 
-/////////////////////////////5-NASTAVIT vyrobu seker /////////////////////////////////
+/////////////////////////////Plnopatova zbroj - zakladni obranne cislo 8/////////////////////////////////
 if (GetTag(no_vzataItem) == "no_vyr_plnpl" ) {
 no_znicit(OBJECT_SELF); //znicime vsechny prepinace
 no_znicit(no_oPC);
@@ -109,7 +109,7 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_zpet
 SetLocalInt(OBJECT_SELF,"no_menu",5);
 } ////////////////////////////////////////
 
-/////////////////////////////6-NASTAVIT vyroba tupych zbrani/////////////////////////////////
+/////////////////////////////Helma /////////////////////////////////
 if (GetTag(no_vzataItem) == "no_vyr_helma" ) {
 no_znicit(OBJECT_SELF); //znicime vsechny prepinace
 no_znicit(no_oPC);
@@ -247,9 +247,9 @@ if (GetTag(no_vzataItem) == "no_zpet" ) {
 no_znicit(OBJECT_SELF); //znicime vsechny prepinace
 no_znicit(no_oPC);
 no_reopen(no_oPC);
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_krouz"),"Krouzkova zbroj"));
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_hrudn"),"Destickova zbroj"));
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_desti"),"Pancir"));
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_krouz"),"Krouzkova kosile"));
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_hrudn"),"Hrudni pancir"));
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_desti"),"Destickova zbroj"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_pulpl"),"Pulovicni platova zbroj"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_plnpl"),"Plna platova zbroj"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_helma"),"Helma"));
@@ -277,7 +277,7 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_pla"),"platina")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_zla"),"zlato")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_zel"),"zelezo")); //pridame tlacitko zpet
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_bro"),"bronz")); //pridame tlacitko zpet
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_bro"),"vermajl")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_med"),"med")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_cin"),"cin")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_mater"),"Zpet")); //pridame tlacitko zpet
@@ -301,7 +301,7 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_pla"),"platina")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_zla"),"zlato")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_zel"),"zelezo")); //pridame tlacitko zpet
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_bro"),"bronz")); //pridame tlacitko zpet
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_bro"),"vermajl")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_med"),"med")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_cin"),"cin")); //pridame tlacitko zpet
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac003",OBJECT_SELF,1,"no_men_mater"),"Zpet")); //pridame tlacitko zpet
@@ -431,7 +431,7 @@ if ( GetLocalInt(OBJECT_SELF,"no_menu") == 86 ) //hlavni material
 if (GetTag(no_vzataItem) == "no_men_bro" ) {
 no_znicit(no_oPC);
 no_reopen(no_oPC);
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_bro"),"bronz")); //pridame tlacitko zpet
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_bro"),"vermajl")); //pridame tlacitko zpet
 
 if ( GetLocalInt(OBJECT_SELF,"no_menu") == 85 ) //hlavni material
     { SetLocalInt(OBJECT_SELF,"no_hl_mat",3);
@@ -630,11 +630,11 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_men_
 
 ////////////kdyz se prida neco do zarizeni/////////////////////////////////////////
 ///doplnena perzistence 5.5.2014
-if (GetInventoryDisturbType()== INVENTORY_DISTURB_TYPE_ADDED) {
+/*if (GetInventoryDisturbType()== INVENTORY_DISTURB_TYPE_ADDED) {
 
 Persist_SaveItemToDB(GetInventoryDisturbItem(), Persist_InitContainer(OBJECT_SELF));
 
-}
+} */
 
 
 }

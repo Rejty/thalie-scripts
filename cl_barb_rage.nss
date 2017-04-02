@@ -14,7 +14,6 @@
 
 
 //include pro schopnosti terryfing rage a thundering rage
-#include "x2_i0_spells"
 //include pro barbarovy funkce
 #include "sh_classes_inc"
 
@@ -26,15 +25,17 @@
 void main()
 {
 
-
-    object oSaveItem = GetSoulStone(OBJECT_SELF);
+    object oSaveItem;
+    if(GetIsPC(OBJECT_SELF) && !GetIsDMPossessed(OBJECT_SELF) )
+      oSaveItem = GetSoulStone(OBJECT_SELF);
+    else
+      oSaveItem = OBJECT_SELF;
 
     if (GetLocalInt(oSaveItem,AKTIVNI_RAGE) == 0)
     {
         //Declare major variables
         object oPC =    OBJECT_SELF;
         int nLevel = GetLevelByClass(CLASS_TYPE_BARBARIAN);
-        object oSaveItem =  GetSoulStone(OBJECT_SELF);
         int iAbility = GetBarbarianAbilityBonus(OBJECT_SELF);
         PlayVoiceChat(VOICE_CHAT_BATTLECRY1);
 
@@ -63,7 +64,7 @@ void main()
 
 
         effect eAC = EffectACDecrease(2, AC_DODGE_BONUS);
-        effect eSave = EffectSavingThrowIncrease(SAVING_THROW_WILL,iAbility);
+        effect eSave = EffectSavingThrowIncrease(SAVING_THROW_WILL,iAbility/2);
         effect eDur = EffectVisualEffect(VFX_DUR_CESSATE_POSITIVE);
         effect eLink = EffectLinkEffects(eAC,eSave);
         if (GetHasFeat(FEAT_EPICGENERAL_CHAOTICKA_ZURIVOST,oPC) == TRUE)

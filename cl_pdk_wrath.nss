@@ -30,7 +30,7 @@ void main()
     // Dodano shaman88
     int iCHA = GetAbilityModifier(ABILITY_CHARISMA,OBJECT_SELF);
     int iLvl =  GetLevelByClass(CLASS_TYPE_PURPLE_DRAGON_KNIGHT,OBJECT_SELF);
-    int iDuration = 5 + iLvl + iCHA;
+    int iDuration = 10 + iLvl + iCHA;
     int iBonus = (iLvl / 5)+1;
 
 
@@ -39,19 +39,16 @@ void main()
 
 
     effect eAttack = EffectAttackIncrease(iBonus);// Increase attack
-    effect eDamage = EffectDamageIncrease(iBonus, DAMAGE_TYPE_BLUDGEONING);// Increase damage
     effect eSave = EffectSavingThrowIncrease(SAVING_THROW_ALL, iBonus);// Increase saving throws
     effect eSkill = EffectSkillIncrease(SKILL_ALL_SKILLS, iBonus);    // Increase skills
     effect eAC = EffectACIncrease(iBonus);
     // Create 'versis racial type' effects
     eAttack = VersusRacialTypeEffect(eAttack, nRace);
-    eDamage = VersusRacialTypeEffect(eDamage, nRace);
     eSave = VersusRacialTypeEffect(eSave, nRace);
     eSkill = VersusRacialTypeEffect(eSkill, nRace);
     eAC = VersusRacialTypeEffect(eAC, nRace);
     // Apply effects to caster
     ApplyEffectToObject(DURATION_TYPE_TEMPORARY, eAttack, oPC, RoundsToSeconds(iDuration));
-    ApplyEffectToObject(DURATION_TYPE_TEMPORARY, eDamage, oPC, RoundsToSeconds(iDuration));
     ApplyEffectToObject(DURATION_TYPE_TEMPORARY, eSave, oPC, RoundsToSeconds(iDuration));
     ApplyEffectToObject(DURATION_TYPE_TEMPORARY, eSkill, oPC, RoundsToSeconds(iDuration));
     ApplyEffectToObject(DURATION_TYPE_TEMPORARY, eAC, oPC, RoundsToSeconds(iDuration));

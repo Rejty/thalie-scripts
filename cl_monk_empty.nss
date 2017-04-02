@@ -30,13 +30,13 @@ void main()
         effect eLink = EffectLinkEffects(eCover, eVis);
         eLink = EffectLinkEffects(eLink, eDur);
 
-        eLink = SupernaturalEffect(eLink);
+        eLink = ExtraordinaryEffect(eLink);
 
         //Fire cast spell at event for the specified target
         SignalEvent(oTarget, EventSpellCastAt(OBJECT_SELF, SPELLABILITY_EMPTY_BODY, FALSE));
         int nDuration = GetLevelByClass(CLASS_TYPE_MONK)+iWis;
 
         //Apply the VFX impact and effects
-        ApplyEffectToObject(DURATION_TYPE_TEMPORARY, eLink, oTarget, RoundsToSeconds(nDuration));
+        ApplyEffectToObject(DURATION_TYPE_TEMPORARY, eLink, oTarget, TurnsToSeconds(nDuration));
     }
 }

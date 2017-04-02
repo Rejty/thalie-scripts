@@ -191,6 +191,9 @@ int __getSuseQual(string sTag) {
 int __getProgressByDifficulty(int no_obtiznost_vyrobku) {
 
   // result is returned value / 10
+  
+  if(no_obtiznost_vyrobku > 190)
+    no_obtiznost_vyrobku = 190;
 
   if (no_obtiznost_vyrobku >= 180 )
     return (200 - no_obtiznost_vyrobku) / 10;
@@ -208,6 +211,9 @@ int __getProgressByDifficulty(int no_obtiznost_vyrobku) {
 
 int __getDestroyingByDifficulty(int no_obtiznost_vyrobku) {
   // result is returned value / 10
+
+  if(no_obtiznost_vyrobku > 190)
+    no_obtiznost_vyrobku = 190;
 
   if (no_obtiznost_vyrobku>=180)
     return (210 - no_obtiznost_vyrobku) / 10;
@@ -421,14 +427,15 @@ void no_xp_kuze(object no_oPC, object no_pec)
     }
 
     if ((no_chance > 0)&(no_chance<100)) {
-      TC_setXPbyDifficulty(no_oPC,TC_KUZE,no_chance,TC_dej_vlastnost(TC_KUZE,no_oPC));    }
+      TC_setXPbyDifficulty(no_oPC,TC_KUZE,no_chance,TC_dej_vlastnost(TC_KUZE,no_oPC));
+    }
 
         //////////povedlo se takze se zlepsi % zhotoveni na polotovaru////////////
         ///////////nacteme procenta z minula kdyz je polotovar novej, mel by mit int=0 /////////////////
     int no_obtiznost_vyrobku = no_DC+( 10*no_level );
 
            //SendMessageToPC(no_oPC," no_obtiznost_vyrobku:" + IntToString(no_obtiznost_vyrobku) );
-    no_procenta = no_procenta + (__getProgressByDifficulty(no_obtiznost_vyrobku) / 10.0);
+    no_procenta = no_procenta + (TC_getProgressByDifficulty(no_obtiznost_vyrobku) / 10.0);
 
 
     if  (GetIsDM(no_oPC)== TRUE) no_procenta = no_procenta + 50.0;
@@ -511,7 +518,7 @@ void no_xp_kuze(object no_oPC, object no_pec)
     float no_procenta = GetLocalFloat(no_Item,"no_suse_proc");
     int no_obtiznost_vyrobku = no_DC+( 10*no_level );
 
-    no_procenta = no_procenta - __getDestroyingByDifficulty(no_obtiznost_vyrobku)/10.0;
+    no_procenta = no_procenta - TC_getDestroyingByDifficulty(no_obtiznost_vyrobku)/10.0;
 
     if (no_procenta <= 0.0 ){
       DestroyObject(no_Item);

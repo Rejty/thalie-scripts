@@ -81,8 +81,8 @@ int ku_si_AddItemProperty_SkillBonus(object oItem, int iSkill, int iPower) {
         sAC = "0.00";
       }
       int iAC = StringToInt(sAC);
-    
-      
+
+
       AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertyACBonus(iPower/3),oItem);
   }*/
 
@@ -114,7 +114,13 @@ int IP_CONST_DAMAGERESIST_50                    = 10;
 */
 int ku_si_AddItemProperty_ElementReduction(object oItem, int iPower, int iElement) {
 
+  // -1 on boots
+  if( GetBaseItemType(oItem) == BASE_ITEM_BOOTS) {
+    iPower--;
+  }
+
   iPower = (iPower/2) - 1; //max 20 (=4)
+//  SpeakString("DEBUG: Aplying Elem reduction elem. "+IntToString(iElement)+ " power "+IntToString(iPower));
 
   //  + 5 resistance on cloths
   if( GetBaseItemType(oItem) == BASE_ITEM_ARMOR) {
@@ -153,11 +159,6 @@ int ku_si_AddItemProperty_AC(object oItem, int iPower) {
   }
   AddItemProperty(DURATION_TYPE_PERMANENT,ip,oItem);
   return TRUE;
-
-  if( GetBaseItemType(oItem) == BASE_ITEM_ARMOR) {
-    AddItemProperty(DURATION_TYPE_PERMANENT,ItemPropertySkillBonus(SKILL_DISCIPLINE,iPower/2),oItem);
-  }
-
 }
 
 
@@ -217,9 +218,32 @@ int IP_CONST_DAMAGEREDUCTION_18                 = 17;
 int IP_CONST_DAMAGEREDUCTION_19                 = 18;
 int IP_CONST_DAMAGEREDUCTION_20                 = 19;
 */
+
+/*
+IP_CONST_DAMAGESOAK_5_HP        1
+IP_CONST_DAMAGESOAK_10_HP       2       
+IP_CONST_DAMAGESOAK_15_HP       3       
+IP_CONST_DAMAGESOAK_20_HP       4       
+IP_CONST_DAMAGESOAK_25_HP       5       
+IP_CONST_DAMAGESOAK_30_HP       6       
+IP_CONST_DAMAGESOAK_35_HP       7       
+IP_CONST_DAMAGESOAK_40_HP       8       
+IP_CONST_DAMAGESOAK_45_HP       9       
+IP_CONST_DAMAGESOAK_50_HP       10
+*/
 int ku_si_AddItemProperty_DmgReduction(object oItem, int iPower) {
 
-// switch(GetBaseItemType(oItem)) {
+  int iEnhancenment = 0;
+  int nHPSoak = 0;
+  switch(GetBaseItemType(oItem)) {
+    case BASE_ITEM_ARMOR:
+      iEnhancenment = (iPower -1) % 5; //0,1,2,3,4,0,1,2,3,4
+      nHPSoak = (iPower + 4 ) / 5; //1 - 2
+      break;
+    default:
+      iEnhancenment = iPower/2; //0 - 5
+      nHPSoak = IP_CONST_DAMAGESOAK_5_HP;
+      break;
 //   case BASE_ITEM_HELMET:
 //   case BASE_ITEM_GLOVES:
 //   case BASE_ITEM_BRACER:
@@ -231,9 +255,8 @@ int ku_si_AddItemProperty_DmgReduction(object oItem, int iPower) {
 //   default:
 //     iPower = iPower - 1 ;
 //     break;
-// }
-        iPower = iPower/2 ;
- itemproperty ip = ItemPropertyDamageReduction(iPower,IP_CONST_DAMAGESOAK_5_HP);
+  }
+ itemproperty ip = ItemPropertyDamageReduction(iEnhancenment, nHPSoak);
  AddItemProperty(DURATION_TYPE_PERMANENT,ip,oItem);
  return TRUE;
 }
@@ -247,10 +270,14 @@ int ku_si_AddItemProperty_AttackBonus(object oItem, int iPower) {
    return TRUE;
  }
  return FALSE;
+}
 
-//bonus dmg added
+int ku_si_AddItemProperty_DamageBonus(object oItem, int iPower, int iType) {
+
+ iPower =  iPower / 2;
+
  if(iPower > 0) {
-   itemproperty ip = ItemPropertyDamageBonus( IP_CONST_DAMAGETYPE_BLUDGEONING,iPower);
+   itemproperty ip = ItemPropertyDamageBonus( iType, iPower);
    AddItemProperty(DURATION_TYPE_PERMANENT,ip,oItem);
    return TRUE;
  }
@@ -512,6 +539,7 @@ int ku_si_AddPropertiesStone_6(object oItem, int iPower) {
 int ku_si_AddPropertiesStone_7(object oItem, int iPower) {
 
   int iBaseItem = GetBaseItemType(oItem);
+//  SpeakString("DEBUG: Aplying property zivec. "+IntToString(iPower));
 
   switch(iBaseItem) {
     case BASE_ITEM_ARMOR:
@@ -631,13 +659,13 @@ int ku_si_AddPropertiesStone_11(object oItem, int iPower) {
 
   switch(iBaseItem) {
     case BASE_ITEM_ARMOR:
-            return ku_si_AddItemProperty_ElementReduction(oItem,iPower/2,IP_CONST_DAMAGETYPE_SONIC);
+            return ku_si_AddItemProperty_ElementReduction(oItem,iPower - 2,IP_CONST_DAMAGETYPE_SONIC);
     case BASE_ITEM_BELT:
 
       return ku_si_AddItemProperty_SaveSpecific(oItem,iPower,IP_CONST_SAVEVS_DEATH);
     case BASE_ITEM_CLOAK:
 
-            return ku_si_AddItemProperty_ElementReduction(oItem,iPower/2,IP_CONST_DAMAGETYPE_SONIC);
+            return ku_si_AddItemProperty_ElementReduction(oItem,iPower - 2,IP_CONST_DAMAGETYPE_SONIC);
     case BASE_ITEM_HELMET:
           return  no_si_AddItemProperty_BonusSpell(oItem,iPower,IP_CONST_CLASS_SORCERER);
     case BASE_ITEM_GLOVES:
@@ -656,22 +684,23 @@ int ku_si_AddPropertiesStone_11(object oItem, int iPower) {
 int ku_si_AddPropertiesStone_12(object oItem, int iPower) {
 
   int iBaseItem = GetBaseItemType(oItem);
+//  SpeakString("DEBUG: Aplying property opal. "+IntToString(iPower));
 
   switch(iBaseItem) {
     case BASE_ITEM_ARMOR:
-
+        return ku_si_AddItemProperty_SR(oItem,iPower);
     case BASE_ITEM_CLOAK:
-
       return ku_si_AddItemProperty_AbilityBonus(oItem,iPower,ABILITY_CHARISMA);
     case BASE_ITEM_BOOTS:
-            return ku_si_AddItemProperty_ElementReduction(oItem,iPower/2,IP_CONST_DAMAGETYPE_SONIC);
+      return ku_si_AddItemProperty_ElementReduction(oItem,iPower - 2,IP_CONST_DAMAGETYPE_SONIC);
     case BASE_ITEM_HELMET:
       return ku_si_AddItemProperty_AbilityBonus(oItem,iPower,ABILITY_WISDOM);
     case BASE_ITEM_BELT:
 
       return ku_si_AddItemProperty_AbilityBonus(oItem,iPower,ABILITY_DEXTERITY);
     case BASE_ITEM_GLOVES:
-      return ku_si_AddItemProperty_AttackBonus(oItem,iPower);
+      return ku_si_AddItemProperty_AttackBonus(oItem,iPower) + 
+             ku_si_AddItemProperty_DamageBonus(oItem,iPower, IP_CONST_DAMAGETYPE_PIERCING);
     case BASE_ITEM_BRACER:
          FloatingTextStringOnCreature(" Chranic nemuze obsahovat utok",OBJECT_SELF,TRUE );
 
@@ -689,15 +718,14 @@ int ku_si_AddPropertiesStone_13(object oItem, int iPower) {
 
   switch(iBaseItem) {
     case BASE_ITEM_ARMOR:
-    return ku_si_AddItemProperty_SR(oItem,iPower);
+      return ku_si_AddItemProperty_SaveUni(oItem,iPower + 2);
     case BASE_ITEM_CLOAK:
-        return ku_si_AddItemProperty_SaveUni(oItem,iPower);
+      return ku_si_AddItemProperty_SaveUni(oItem,iPower);
     case BASE_ITEM_BOOTS:
       return ku_si_AddItemProperty_Save(oItem,iPower,IP_CONST_SAVEBASETYPE_REFLEX);
     case BASE_ITEM_HELMET:
       return ku_si_AddItemProperty_AbilityBonus(oItem,iPower,ABILITY_INTELLIGENCE);
     case BASE_ITEM_BELT:
-
       return ku_si_AddItemProperty_AbilityBonus(oItem,iPower,ABILITY_STRENGTH);
     case BASE_ITEM_GLOVES:
       return ku_si_AddItemProperty_AbilityBonus(oItem,iPower,ABILITY_DEXTERITY);
@@ -716,7 +744,8 @@ int ku_si_AddPropertiesStone_14(object oItem, int iPower) {
 
   switch(iBaseItem) {
     case BASE_ITEM_ARMOR:
-      return ku_si_AddItemProperty_AC(oItem,iPower);
+      return ku_si_AddItemProperty_AC(oItem,iPower) + 
+             ku_si_AddItemProperty_SkillBonus(oItem, SKILL_DISCIPLINE, iPower / 2) ;
     case BASE_ITEM_HELMET:
       return ku_si_AddItemProperty_SaveSpecific(oItem,iPower,IP_CONST_SAVEVS_MINDAFFECTING);
     case BASE_ITEM_CLOAK:
@@ -771,11 +800,17 @@ int ku_si_AddPropertiesStone_15(object oItem, int iPower) {
 
 int tc_si_AddPropertyForStone(object oItem, int iStone, int iPower, int bAllowOverPOwer = FALSE) {
 
-  if(iStone <= 0)
-    return FALSE;
+//  SpeakString("DEBUG: Apply stone "+IntToString(iStone)+" power "+IntToString(iPower));
 
-  if(iPower <=0)
+  if(iStone <= 0) {
+    SpeakString("Chyba! Kamen je "+IntToString(iStone));
     return FALSE;
+  }
+
+  if(iPower <=0) {
+    SpeakString("Chyba! Sila kamenu je "+IntToString(iPower));
+    return FALSE;
+  }
 
   if( (bAllowOverPOwer == FALSE) && (iPower > 10) ) {
     iPower = 10;

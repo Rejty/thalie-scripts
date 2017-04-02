@@ -587,6 +587,13 @@ void spellsInflictTouchAttack(int nDamage, int nMaxExtraDamage, int nMaximized, 
     int nTouch = TouchAttackMelee(oTarget);
 
     int nExtraDamage = GetCasterLevel(OBJECT_SELF); // * figure out the bonus damage
+
+    // Heretic
+    int iHereticLevel = GetLevelByClass(31, OBJECT_SELF); // Heretic
+    if(iHereticLevel > 0 && (iHereticLevel + 10) > nExtraDamage) {
+      nExtraDamage = iHereticLevel + 10;
+    }
+
     if (nExtraDamage > nMaxExtraDamage)
     {
         nExtraDamage = nMaxExtraDamage;
@@ -1104,7 +1111,7 @@ void DoPetrification(int nPower, object oSource, object oTarget, int nSpellID, i
                 {
                     //Boss exception
                     if(GetIsBoss(oTarget))
-                      ApplyBossInstantKillDamage(oTarget, GetCasterLevel(oSource));
+                      ApplyBossInstantKillDamage(oTarget, GetCasterLevel(oSource),FALSE);
                     else
                       ApplyEffectToObject(DURATION_TYPE_PERMANENT, eLink, oTarget);
 
@@ -1486,8 +1493,7 @@ void doAura(int nAlign, int nVis1, int nVis2, int nDamageType)
     }
 
     effect eVis = EffectVisualEffect(nVis1);
-    effect eAC = EffectACIncrease(6, AC_DEFLECTION_BONUS);
-    effect eSave = EffectSavingThrowIncrease(SAVING_THROW_ALL, 4);
+    effect eAC = EffectACIncrease(4, AC_DODGE_BONUS);
     //Change the effects so that it only applies when the target is evil
     effect eImmune = EffectImmunity(IMMUNITY_TYPE_MIND_SPELLS);
     effect eSR = EffectSpellResistanceIncrease(25); //Check if this is a bonus or a setting.
@@ -1501,13 +1507,12 @@ void doAura(int nAlign, int nVis1, int nVis2, int nDamageType)
     eImmune = VersusAlignmentEffect(eImmune, ALIGNMENT_ALL, nAlign);
     eSR = VersusAlignmentEffect(eSR,ALIGNMENT_ALL, nAlign);
     eAC =  VersusAlignmentEffect(eAC,ALIGNMENT_ALL, nAlign);
-    eSave = VersusAlignmentEffect(eSave,ALIGNMENT_ALL, nAlign);
     eEvil = VersusAlignmentEffect(eEvil,ALIGNMENT_ALL, nAlign);
 
 
     //Link effects
-    effect eLink = EffectLinkEffects(eImmune, eSave);
-    eLink = EffectLinkEffects(eLink, eAC);
+//    effect eLink = EffectLinkEffects(eImmune, eSave);
+    effect eLink = EffectLinkEffects(eImmune, eAC);
     eLink = EffectLinkEffects(eLink, eSR);
     eLink = EffectLinkEffects(eLink, eDur);
     eLink = EffectLinkEffects(eLink, eDur2);

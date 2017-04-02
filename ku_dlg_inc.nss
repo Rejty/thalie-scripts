@@ -85,7 +85,7 @@ void ku_dlg_init(int act, object oPC = OBJECT_INVALID) {
      case 4:
         KU_DM_NPC_Handling_Wand_SetTokens(0,oPC);
         SetLocalInt(oPC,KU_DLG+"_allow_0",1);
-        SetCustomToken(6300,"DM hulka uprav NPC.");
+//        SetCustomToken(6300,"DM hulka uprav NPC.");
         break;
      case 5:
         KU_DM_Effects_Wand_SetTokens(0,oPC);
@@ -1133,7 +1133,7 @@ void KU_DM_NPC_Handling_Wand_SetTokens(int iState, object oPC = OBJECT_INVALID) 
     case 0:
         ku_dlg_SetAll(0);
         ku_dlg_SetConv(0,1);
-        SetCustomToken(6300,"DM hulka uprav NPC zamirena na: "+sTargetName);
+        SetCustomToken(6300,"DM hulka uprav NPC zamirena na: "+sTargetName+"("+GetTag(oTarget)+")("+GetResRef(oTarget)+")");
         ku_dlg_SetConv(1,1);
         SetCustomToken(6301,"Zkopirovat NPC");
         ku_dlg_SetConv(2,1);
@@ -2331,7 +2331,7 @@ void KU_DM_PortalsAct(int act) {
         // Zacni portal trigger
         case 2: {
           string sTag = "trans_"+GetStringLeft(GetPCPlayerName(oPC),10)+IntToString(ku_GetTimeStamp());
-          object oTrans = CreateAreaTransitionOnLocation(lTarget,AREA_TRANSITION_LINK_NONE,sTag,1.0,sTag);
+          object oTrans = CreateAreaTransitionAtLocation(lTarget,AREA_TRANSITION_LINK_NONE,sTag,1.0,sTag);
           SetLocalObject(oPC,"KU_TRANS_A",oTrans);
           SetLocalString(oPC,"KU_TRANS_TAG",sTag);
           SendMessageToPC(oPC,"***** Portal zapocat ****** ");
@@ -2364,7 +2364,7 @@ void KU_DM_PortalsAct(int act) {
             return;
           }
           string sTag = GetLocalString(oPC,"KU_TRANS_TAG");
-          object oTransB = CreateAreaTransitionOnLocation(lTarget,AREA_TRANSITION_LINK_NONE,sTag,1.0,sTag);
+          object oTransB = CreateAreaTransitionAtLocation(lTarget,AREA_TRANSITION_LINK_NONE,sTag,1.0,sTag);
 
           SetLocalObject(oTransB,"FUNCSEXT_TRANSITION_TARGET",oTransA);
           SetLocalObject(oTransA,"FUNCSEXT_TRANSITION_TARGET",oTransB);
@@ -2574,13 +2574,19 @@ void KU_DicesSayThrow(object oPC, object oTarget, int iThrow, int iDice, int iVi
   string sSay = GetName(oTarget)+" hazi d("+IntToString(iDice)+")"+sText+" : "+IntToString(iThrow);
 
   SendMessageToPC(oPC,sSay);
-  // Tel to others
 
+  // Tel to DM/ targeted player
   if(iVisibility == 2) {
-    SendMessageToAllDMs(sSay);
+    if(GetIsDM(oPC)) {
+      if(GetIsPC(oTarget))
+        SendMessageToPC(oTarget, sSay);
+    }
+    else
+      SendMessageToAllDMs(sSay);
     return;
   }
 
+  // Tell to all around
   if(iVisibility == 3) {
     object oTell = GetFirstPC();
     while(GetIsObjectValid(oTell)) {
@@ -2589,7 +2595,7 @@ void KU_DicesSayThrow(object oPC, object oTarget, int iThrow, int iDice, int iVi
           float fDistance = GetDistanceBetween(oPC, oTell);
           if(fDistance > 0.0 &&
              fDistance < 20.1)
-            SendMessageToPC(oPC,sSay);
+            SendMessageToPC(oTell,sSay);
         }
       }
       oTell = GetNextPC();
@@ -2612,7 +2618,7 @@ string __abilityToString(int Ability) {
 
 string __saveToString(int iSave) {
    switch(iSave) {
-     case 0: return "Obecnou zachranu";
+     case 1: return "Obecnou zachranu";
      case 2: return "Fortitude";
      case 3: return "Reflex";
      case 4: return "Will";
@@ -2622,6 +2628,9 @@ string __saveToString(int iSave) {
 
 int KU_DicesDoThrow(object oPC,object oTarget) {
   object oSoul = GetSoulStone(oPC);
+  if(GetIsDM(oPC))
+    oSoul = oPC;
+
   int iVisibility = GetLocalInt(oSoul,"KU_DICES_VISIBILITY");
   int iType1 = GetLocalInt(oPC,"KU_DICES_TYPE1");
   int iType2 = GetLocalInt(oPC,"KU_DICES_TYPE2");
@@ -2641,8 +2650,14 @@ int KU_DicesDoThrow(object oPC,object oTarget) {
       sAdd = __abilityToString(iType2);
       break;
     case 2:
-      iAdd = GetSavingThrowBonus(oTarget, iType2);
+      switch(iType2) {
+        case 1: iAdd = 0; break;
+        case 2: GetFortitudeSavingThrow(oTarget); break;
+        case 3: GetReflexSavingThrow(oTarget); break;
+        case 4: GetWillSavingThrow(oTarget); break;
+      }
       sAdd = __saveToString(iType2);
+      break;
     case 3:
       iAdd =  GetSkillRank(iType2, oTarget);
       sAdd = Get2DAString("skills","Label",iType2);
@@ -2660,6 +2675,10 @@ void KU_DicesAct(int act) {
   location lTarget = GetLocalLocation(oPC,KU_WAND_TARGET_LOC);
   object oTarget = GetLocalObject(oPC,KU_WAND_TARGET );
   object oSoul = GetSoulStone(oPC);
+
+  if(GetIsDM(oPC)) {
+    oSoul = oPC;
+  }
 
   // Only DM can do throw on others
   if(!GetIsDM(oPC))
@@ -2754,7 +2773,7 @@ void KU_DicesAct(int act) {
         case 2:
         case 3:
         case 4:
-          SetLocalInt(oPC,"KU_DICES_TYPE2",act - 1);
+          SetLocalInt(oPC,"KU_DICES_TYPE2",act);
           SetLocalInt(oPC,KU_DLG+"state",24);
           break;
       }
@@ -2840,7 +2859,10 @@ void KU_DicesSetTokens(int iState, object oPC = OBJECT_INVALID) {
         ku_dlg_SetConv(1,1);
         SetCustomToken(6301,"Jen ja");
         ku_dlg_SetConv(2,1);
-        SetCustomToken(6302,"Ja a DM");
+        if(bIsDM)
+          SetCustomToken(6302,"DM a hráč");
+        else
+          SetCustomToken(6302,"Ja a DM");
         ku_dlg_SetConv(3,1);
         SetCustomToken(6303,"Vsichni okolo" );
         ku_dlg_SetConv(10,1);
@@ -2887,8 +2909,8 @@ void KU_DicesSetTokens(int iState, object oPC = OBJECT_INVALID) {
         ku_dlg_SetAll(0);
         ku_dlg_SetConv(0,1);
         SetCustomToken(6300,"Hazet na Zachranu:");
-        ku_dlg_SetConv(1,1);
-        SetCustomToken(6301,"Obecný");
+//        ku_dlg_SetConv(1,1);
+//        SetCustomToken(6301,"Obecný");
         ku_dlg_SetConv(2,1);
         SetCustomToken(6302,"Fortitude");
         ku_dlg_SetConv(3,1);
@@ -3005,7 +3027,7 @@ void KU_SummonsSetTokens(int iState, object oPC = OBJECT_INVALID) {
       int iSummonAlignment;
       int iRow;
       for(sum = 0; sum <= 8; sum++) { // We have 8 types of summons
-        iRow = sum * 9 + iState; //9 levels of summons
+        iRow = sum * 9 + iState - 1; //9 levels of summons
         iSummonAlignment = StringToInt(Get2DAString("summon","ALIGNMENT",iRow));
         // Check summoner alignment
         if((iSummonAlignment & nAlignment) == 0)
@@ -3036,7 +3058,7 @@ void KU_SummonsAct(int act) {
 
   // Do nothing
   if(act == 0) {
-    KU_DicesSetTokens(iState);
+    KU_SummonsSetTokens(iState);
     return;
   }
 
@@ -3044,15 +3066,17 @@ void KU_SummonsAct(int act) {
     // Spusteni hulky
     case 0: {
       SetLocalInt(oPC,KU_DLG+"state",act);
+      break;
     }
     // Set summon
     default: {
-      int iRow = (iState-1) * 9 + act -1 ; //9 levels of summons
+//      int iRow = (iState-1) * 9 + act -1 ; //9 levels of summons
+      int iRow = (act-1) * 9 + iState - 1; //9 levels of summons
       SetLocalString(oSoul,"KU_SUMMON_"+IntToString(iState),Get2DAString("summon","BASERESREF",iRow) + "0" + IntToString(iState));
       SendMessageToPC(oPC, "Vybran "+Get2DAString("summon","NAME",iRow)+" pro "+IntToString(iState)+". kruh.");
     }
   }
 
   iState = GetLocalInt(oPC,KU_DLG+"state");
-  KU_DicesSetTokens(iState);
+  KU_SummonsSetTokens(iState);
 }

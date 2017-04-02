@@ -42,6 +42,8 @@ int ku_loot_GetIsWeapon(object oItem);
 // Spawn unique boss loot on boss corpse
 int ku_LootCreateBossUniqueLootItems(object oBoss);
 
+int __LootCreateBossUniqueLootItems(object oBoss, string sBoxTag);
+
 //
 // Init unique boss loot
 // Run this on module load script
@@ -195,7 +197,25 @@ void ku_InitBossUniqueLoot() {
 
 int ku_LootCreateBossUniqueLootItems(object oBoss) {
 
-  string sBoxTag = GetLocalString(oBoss,"LOOT");
+  string sBoxTag;
+  int iCount = 0;
+  sBoxTag = GetLocalString(oBoss,"LOOT");
+  if(GetStringLength(sBoxTag) > 0)
+    iCount += __LootCreateBossUniqueLootItems(oBoss, sBoxTag);
+  sBoxTag = GetLocalString(oBoss,"LOOT2");
+  if(GetStringLength(sBoxTag) > 0)
+    Count += __LootCreateBossUniqueLootItems(oBoss, sBoxTag);
+  sBoxTag = GetLocalString(oBoss,"LOOT3");
+  if(GetStringLength(sBoxTag) > 0)
+    iCount += __LootCreateBossUniqueLootItems(oBoss, sBoxTag);
+  sBoxTag = GetLocalString(oBoss,"LOOT4");
+  if(GetStringLength(sBoxTag) > 0)
+    iCount += __LootCreateBossUniqueLootItems(oBoss, sBoxTag);
+
+  return iCount;
+}
+
+int __LootCreateBossUniqueLootItems(object oBoss, string sBoxTag) {
 
   WriteTimestampedLogEntry("BOSS '"+GetName(oBoss)+"' has lootbag '"+sBoxTag+"'");
 
@@ -276,10 +296,17 @@ object ku_LootCreateBossUniqueItem(object oBoss, string sBoxTag) {
       if(GetLocalInt(OBJECT_SELF,"DEBUG") > 0) {
         SpeakString("DEBUG: "+GetName(oNew)+" + vlastnosti siti o sile kamenu "+IntToString(iPower1*20)+"% a "+IntToString(iPower1*20)+"%");
       }
-      tc_si_AddPropertyForStone(oNew,iStone1,iPower1,TRUE);
-      tc_si_AddPropertyForStone(oNew,iStone2,iPower2,TRUE);
+      if(iPower1 > 0)
+        tc_si_AddPropertyForStone(oNew,iStone1,iPower1,TRUE);
+      if(iPower2 > 0)
+        tc_si_AddPropertyForStone(oNew,iStone2,iPower2,TRUE);
       break;
     case BASE_ITEM_AMULET:
+      /* Block natural AC bonus */
+      if(iStone1 == 8)
+        iStone1 = 15;
+      if(iStone2 == 8)
+        iStone2 = 15;
     case BASE_ITEM_RING:
       /* Apply jewelery properties */
       if(GetLocalInt(OBJECT_SELF,"DEBUG") > 0) {

@@ -15,6 +15,7 @@
 #include "ku_ships"
 //#include "ku_dlg_inc"
 #include "sh_sipy_inc"
+#include "ku_write_inc"
 
 void FRAKCE_ZabitiHracePoAktivaciItemu(object oPC,string sInt);
 void FRAKCE_ZabitiHracePoAktivaciItemu(object oPC,string sInt)
@@ -57,6 +58,16 @@ void main()
   // Lodni listek "ku_ship_ticket"
   if (GetStringLeft(sActivated,14) == "ku_ship_ticket" ) {
      ku_ShipsTellDepartureTime(GetStringRight(sActivated,GetStringLength(sActivated) - 14),oPlayer);
+  }
+
+  /* Writing documents */
+  if(sActivated == "sy_not_document" ||
+     sActivated == "sy_not_letter" ||
+     sActivated == "sy_not_paper" ||
+     sActivated == "sy_logbook") {
+     /* sy_not_pen */
+    StartStopWriting(oPlayer, oActivated);
+    return;
   }
  /*
   // DM hulka

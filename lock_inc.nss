@@ -169,9 +169,17 @@ void LOCK_ProcessSpawnIF(object oSpawn);
 // Spawner list
 void LOCK_ProcessSpawnLIST(object oSpawn);
 
+// Area switch spawner
+void LOCK_ProcessSpawnAreaSWITCH(object oSpawn);
+
+// Boss Checkers
+void LOCK_BossCheckerCheckHP(object oBoss, object oSpawner);
+
 int ku_ChooseTrap(int power, int type) {
 
   int nTrap = 0;
+  if(power > 5)
+    power = 5;
 
   switch(power) {
 
@@ -269,9 +277,15 @@ int ku_ChooseTrap(int power, int type) {
   return nTrap;
 }
 
+void __trapRandomRecoverable(object oTrap) {
+  if(Random(100) > 60) {
+     SetTrapRecoverable(oTrap, FALSE);
+  }
+}
+
 void ku_SetTrapDC(object oObject, int iTrapPower)
 {
-    if(iTrapPower < 0) 
+    if(iTrapPower < 0)
       iTrapPower = 0;
     SetTrapDetectDC(oObject,3 + 3*iTrapPower + d4());
     SetTrapDisarmDC(oObject,14 + 4*iTrapPower + Random(5));
@@ -281,6 +295,7 @@ void ku_SetRandomTrap(object oObject, int iTrapPower)
 {
   CreateTrapOnObject(ku_ChooseTrap(iTrapPower,Random(11)+1),oObject, STANDARD_FACTION_HOSTILE,"ku_trap_disarm" );
   ku_SetTrapDC(oObject,iTrapPower);
+  __trapRandomRecoverable(oObject);
 }
 
 void ku_SpawnTrap(object oSpawner) {
@@ -336,6 +351,7 @@ void ku_SpawnTrap(object oSpawner) {
         SetTrapDisarmDC(oTrap,iDC);
   }
   SetTrapOneShot(oTrap, iOneShot);
+  __trapRandomRecoverable(oTrap);
 
   SetLocalInt(oTrap, "LOCK_DESPAWN",1);
 
@@ -396,7 +412,37 @@ void ku_LockLoot(object oChest, int iLockDC) {
       SetLockKeyRequired(oChest,FALSE);
       SetLockUnlockDC(oChest,Random(iLockDC)+(iLockDC/2));
     }
-  
+
+}
+
+void __createTrapOnLoot(object oObject, int iOneshot = 0, int iMod = 0) {
+  string sLootScript = GetStringLowerCase(GetScript(oObject, PLACEABLE_SCRIPT_OPEN));
+  int iLootType = 0;
+
+  // Trap enhancment by loot power
+  if(FindSubString(sLootScript,"high")>-1)
+    iLootType = 4;
+  else if(FindSubString(sLootScript,"uniq")>-1)
+    iLootType = 4;
+  else if(FindSubString(sLootScript,"med")>-1)
+    iLootType = 1;
+  else if(FindSubString(sLootScript,"low")>-1)
+    iLootType = 0;
+
+  // Trap levels
+  int iTrapPower = (GetLocalInt(GetArea(oObject),"TREASURE_VALUE")+ iLootType) / 5 + iMod;
+  if(iTrapPower <= 0)
+    return;
+
+  CreateTrapOnObject(ku_ChooseTrap(iTrapPower, Random(11)+1), oObject, STANDARD_FACTION_HOSTILE,"ku_trap_disarm");
+
+  if(Random(100) < iOneshot)
+    SetTrapOneShot(oObject,FALSE);
+
+  SetTrapDetectDC(oObject,0 + 3*iTrapPower + d4());
+  SetTrapDisarmDC(oObject,10 + 4*iTrapPower + Random(5));
+  __trapRandomRecoverable(oObject);
+
 }
 
 void LOCK_SpawnPlaceable(location lLoc, string sTAG, string sNewTag="")
@@ -416,34 +462,25 @@ void LOCK_SpawnPlaceable(location lLoc, string sTAG, string sNewTag="")
     if(iTrapsProb == 0)
       return;
 
-    int iTrapPower = GetLocalInt(GetArea(oObject),"TREASURE_VALUE") / 5 +1;
+    int iLockPower = GetLocalInt(GetArea(oObject),"TREASURE_VALUE") / 5 +1;
 
     if( (FindSubString(sResref,"corpse")>-1) && (Random(100)  < (15 * iTrapsProb /100) ) ) {
-      iTrapPower--;
-      CreateTrapOnObject(ku_ChooseTrap(iTrapPower,Random(11)+1),oObject, STANDARD_FACTION_HOSTILE,"ku_trap_disarm");
+      __createTrapOnLoot(oObject, 0, -1);
     } else if( (FindSubString(sResref,"treasure")>-1) && (Random(100) < (5 * iTrapsProb /100)) )  {
-      iTrapPower--;
-      CreateTrapOnObject(ku_ChooseTrap(iTrapPower,Random(11)+1),oObject, STANDARD_FACTION_HOSTILE,"ku_trap_disarm" );
+      __createTrapOnLoot(oObject, 0, -1);
     } else if( (FindSubString(sResref,"barrel")>-1) && (Random(100) < (30 * iTrapsProb /100)) ) {
-      CreateTrapOnObject(ku_ChooseTrap(iTrapPower,Random(11)+1),oObject, STANDARD_FACTION_HOSTILE,"ku_trap_disarm" );
+      __createTrapOnLoot(oObject, 0, 0);
     } else if( (FindSubString(sResref,"box")>-1) && (Random(100) < (50 * iTrapsProb /100)) ) {
-      CreateTrapOnObject(ku_ChooseTrap(iTrapPower,Random(11)+1),oObject, STANDARD_FACTION_HOSTILE,"ku_trap_disarm" );
-      if(Random(100) < 40)
-        SetTrapOneShot(oObject,FALSE);
+      __createTrapOnLoot(oObject, 40, 0);
       if(Random(100) < 15)
-        ku_LockLoot(oObject, iTrapPower);
+        ku_LockLoot(oObject, iLockPower);
     } else if( (FindSubString(sResref,"chest")>-1) && (Random(100) < (70 * iTrapsProb /100)) ) {
-//      iTrapPower++;
-      CreateTrapOnObject(ku_ChooseTrap(iTrapPower,Random(11)+1),oObject, STANDARD_FACTION_HOSTILE,"ku_trap_disarm" );
+      __createTrapOnLoot(oObject, 50, 0);
       if(Random(100) < 50)
-        SetTrapOneShot(oObject,FALSE);
-      if(Random(100) < 50)
-        ku_LockLoot(oObject, iTrapPower);
+        ku_LockLoot(oObject, iLockPower);
     } else {
        return;
     }
-    SetTrapDetectDC(oObject,5 + 4*iTrapPower + d4());
-    SetTrapDisarmDC(oObject,19 + 5*iTrapPower + Random(5));
 
 }
 
@@ -457,7 +494,7 @@ void LOCK_SpawnObject(object oPC, location lLoc, string sTAG, string sNewTag="")
     SetLocalInt(oObject, "LOCK_DESPAWN", 1);
 }
 
-int LOCK_ProcessSpawn(object oSpawn, float fSpawnDelay) {
+int LOCK_ProcessSpawn(object oSpawn, float fSpawnDelay, object oFaction=OBJECT_INVALID ) {
   string sType = GetLocalString(oSpawn,"SPAWN_TYPE");
   location lLoc = GetLocation(oSpawn);
 
@@ -466,7 +503,7 @@ int LOCK_ProcessSpawn(object oSpawn, float fSpawnDelay) {
     return TRUE;
   }
   if(sType == "GROUP") {
-    LOCK_SpawnGroup(oSpawn);
+    LOCK_SpawnGroup(oSpawn, oFaction);
     return TRUE;
   }
   if(sType == "PLC") {
@@ -478,7 +515,7 @@ int LOCK_ProcessSpawn(object oSpawn, float fSpawnDelay) {
   if(sType == "NPC") {
     string sResref  = GetLocalString(oSpawn, "RESREF");
     string NEWTAG   = GetLocalString(oSpawn, "NEWTAG");
-    DelayCommand(fSpawnDelay, LOCK_SpawnCreature(lLoc, sResref, NEWTAG)); 
+    DelayCommand(fSpawnDelay, LOCK_SpawnCreature(lLoc, sResref, NEWTAG, oFaction));
     return TRUE;
   }
   if(sType == "SLOOT" ||
@@ -494,6 +531,12 @@ int LOCK_ProcessSpawn(object oSpawn, float fSpawnDelay) {
     LOCK_ProcessSpawnLIST(oSpawn);
     return TRUE;
   }
+  if(sType == "ASWITCH" ) {
+    LOCK_ProcessSpawnAreaSWITCH(oSpawn);
+    return TRUE;
+  }
+
+  WriteTimestampedLogEntry("ERROR: Unknown spawn type '"+sType+"' on "+GetTag(oSpawn)+" in "+GetTag(GetArea(oSpawn)));
 
   return FALSE;
 
@@ -508,7 +551,7 @@ void LOCK_CleanArea(object oArea)
         iObject = GetObjectType(oObject);
         if (GetIsPC(oObject))
         {
-            WriteTimestampedLogEntry("**/!\** Joueur: " + GetName(oObject) + " present dans la zone" + GetName(OBJECT_SELF) + " lors du nettoyage **/!\**");
+//            WriteTimestampedLogEntry("**/!\** Joueur: " + GetName(oObject) + " present dans la zone" + GetName(OBJECT_SELF) + " lors du nettoyage **/!\**");
             return;
         }
         else if(GetIsDM(oObject)){
@@ -983,7 +1026,7 @@ void lock_init_location() {
     ja_loc_type = GetLocalInt(oLoc,"JA_LOC_TYPE");
     string sValues = "'"+sResRef+"',"+
                      "'"+sTag+"',"+
-                     "'"+GetName(oLoc)+"',"+
+                     "'"+SQLEncodeSpecialChars(GetName(oLoc))+"',"+
                      "'0',"+
                      "'"+IntToString(ja_loc_type)+"'";
     sSQL = "INSERT INTO location_property (resref,tag,name,alive,JA_LOC_TYPE) VALUES ("+sValues+");";
@@ -1043,6 +1086,7 @@ int lock_init_bosses(object oArea) {
       AssignCommand(oNPC, ClearAllActions(TRUE));
       ApplyEffectToObject(DURATION_TYPE_PERMANENT, eLink,oNPC);
       */
+      SetLocalLocation(oNPC,"LOCK_MY_SPAWNPOINT",GetLocation(oNPC));
       DelayCommand(1.0,JumpToLimbo(oNPC));
 /*      DelayCommand(1.0, ApplyEffectToObject(DURATION_TYPE_PERMANENT, eGhost,oNPC));
       DelayCommand(2.0, ApplyEffectToObject(DURATION_TYPE_PERMANENT, eDisApp,oNPC));*/
@@ -1050,6 +1094,7 @@ int lock_init_bosses(object oArea) {
       SetLocalObject(oArea,"SLEEPING_BOSS_"+IntToString(cnt),oNPC);
       SetLocalObject(oNPC,"KU_MY_AREA",oArea);
 //      SendMessageToPC(GetFirstPC(),"Saved boss "+GetName(oNPC));
+      WriteTimestampedLogEntry("BOSS initailized "+GetName(oNPC)+" in "+GetTag(oArea));
     }
     oNPC = GetNearestObject(OBJECT_TYPE_CREATURE, oFirst, i);
     i++;
@@ -1066,9 +1111,19 @@ void __bossCheckersRegister(object oBoss) {
   int i = 1;
   object oChecker = GetNearestObjectByTag(sTag, oBoss, i);
   while(GetIsObjectValid(oChecker)) {
-    // Give me boss reference
-    SetLocalObject(oChecker,"__LOCK_BOSS",oBoss);
-    ExecuteScript(GetLocalString(oChecker, "CHECK_SCRIPT"), oChecker);
+    if(GetObjectType(oChecker) == OBJECT_TYPE_WAYPOINT) {
+      // Give me boss reference
+      SetLocalObject(oChecker,"__LOCK_BOSS",oBoss);
+//      WriteTimestampedLogEntry("BOSS CHECKER "+GetName(oBoss)+"  "+GetTag(oChecker));
+      string sChecker = GetLocalString(oChecker, "CHECK"+sChecker);
+      // Back compatibility
+      WriteTimestampedLogEntry("BOSS CHECKER found "+sChecker);
+      if(GetLocalString(oChecker, "CHECK_SCRIPT") == "ku_sp_checkhp")
+        sChecker = "HP";
+      if(sChecker == "HP")
+        DelayCommand(3.0, LOCK_BossCheckerCheckHP(oBoss, oChecker));
+ //    ExecuteScript(GetLocalString(oChecker, "CHECK_SCRIPT"), oChecker);
+    }
     i++;
     oChecker = GetNearestObjectByTag(sTag, oBoss, i);
   }
@@ -1078,6 +1133,8 @@ int lock_SpawnBosses(object oArea) {
 
   int iBossCount = GetLocalInt(oArea,"BOSS_COUNT");
   int i;
+
+//  WriteTimestampedLogEntry("BOSS spawn check "+GetTag(oArea));
 
 
 //  SendMessageToPC(GetFirstPC(),"Spawning if "+IntToString(ku_GetTimeStamp())+"<"+IntToString(GetLocalInt(oArea,"NEXT_BOSS_SPAWN_TIME")));
@@ -1104,11 +1161,13 @@ int lock_SpawnBosses(object oArea) {
 //    SendMessageToPC(GetFirstPC(),"Spawn all "+IntToString(iBossCount));
     for(i=1;i<=iBossCount;i++) {
       oNPC = GetLocalObject(oArea,"SLEEPING_BOSS_"+IntToString(i));
-      oBoss = CopyObject(oNPC,GetLocation(oNPC));
+      oBoss = CopyObject(oNPC,GetLocalLocation(oNPC,"LOCK_MY_SPAWNPOINT"));
       ChangeFaction(oBoss,oNPC);
       lock_CopyVars(oBoss,oNPC);
       lock_AppearBoss(oBoss);
       SetLocalObject(oArea,"ACTUAL_BOSS",oBoss);
+      WriteTimestampedLogEntry("BOSS spawned "+GetTag(oBoss)+" "+GetName(oBoss));
+      DelayCommand(0.5, __bossCheckersRegister(oBoss));
     }
     return iBossCount;
   }
@@ -1124,12 +1183,14 @@ int lock_SpawnBosses(object oArea) {
       i = Random(iBossCount)+1;
       /* Spawn boss */
       oNPC = GetLocalObject(oArea,"SLEEPING_BOSS_"+IntToString(i));
-      oBoss = CopyObject(oNPC,GetLocation(oNPC));
+      oBoss = CopyObject(oNPC,GetLocalLocation(oNPC,"LOCK_MY_SPAWNPOINT"));
       ChangeFaction(oBoss,oNPC);
 //      SendMessageToPC(GetFirstPC(),"Spawning "+GetName(oBoss));
       lock_CopyVars(oBoss,oNPC);
       lock_AppearBoss(oBoss);
       SetLocalObject(oArea,"ACTUAL_BOSS",oBoss);
+      WriteTimestampedLogEntry("BOSS spawned "+GetTag(oBoss)+" "+GetName(oBoss));
+      DelayCommand(0.5, __bossCheckersRegister(oBoss));
       cnt--;
     }
 
@@ -1272,7 +1333,7 @@ void lock_SpawnBossLoot(object oArea) {
   if(iTREASURE_VALUE == 0) {
     iTREASURE_VALUE = GetLocalInt(oArea,"loot");
   }
-  int iTrapPower = iTREASURE_VALUE / 5 +2;
+  int iTrapPower = (iTREASURE_VALUE+2) / 5 +1;
 
   while(i<=iCnt) {
     si = IntToString(i);
@@ -1293,11 +1354,13 @@ void lock_SpawnBossLoot(object oArea) {
 
     //TRAPS
     if(iTrapsProb != 0) {
-      CreateTrapOnObject(ku_ChooseTrap(iTrapPower,Random(11)+1),oChest, STANDARD_FACTION_HOSTILE,"ku_trap_disarm" );
+      __createTrapOnLoot(oChest, 50 , 1);
+/*      CreateTrapOnObject(ku_ChooseTrap(iTrapPower,Random(11)+1),oChest, STANDARD_FACTION_HOSTILE,"ku_trap_disarm" );
       if(Random(100) < 50)
         SetTrapOneShot(oChest,FALSE);
       SetTrapDetectDC(oChest,5 + 4*iTrapPower + d4());
       SetTrapDisarmDC(oChest,19 + 5*iTrapPower + Random(5));
+      __trapRandomRecoverable(oChest);*/
     }
     /* Locking */
     iLockDC = GetLocalInt(oArea,"BOSS_LOOT_LOCKED_"+si);
@@ -1386,7 +1449,7 @@ int lock_init_SPLC(object oArea) {
           SetLocalInt(oSpawner,"__SPLC_LOCKED_"+si,GetLocked(oNPC)*GetLockUnlockDC(oNPC));
         }
         DestroyObject(oNPC,2.0);
-        
+
         SetLocalInt(oSpawner, "__SPLC_COUNT", iCnt + 1);
       }
       else {
@@ -1438,7 +1501,7 @@ void __processSpawnByTag(object oSpawner, string sTag) {
     return;
   if(sTag == "NONE")
     return;
-  
+
   int i = 1;
   object oSpawn =  GetNearestObjectByTag(sTag, oSpawner, i);
   while(GetIsObjectValid(oSpawn)) {
@@ -1471,9 +1534,9 @@ void LOCK_ProcessSpawnIF(object oSpawn) {
     if(iProb < 0) {
       __processSpawnByTag(oSpawn, GetLocalString(oSpawn, "SP_WP"+si));
       return;
-    }    
+    }
   }
-  
+
 }
 
 void LOCK_ProcessSpawnLIST(object oSpawn) {
@@ -1490,4 +1553,42 @@ void LOCK_ProcessSpawnLIST(object oSpawn) {
   }
 }
 
+void LOCK_ProcessSpawnAreaSWITCH(object oSpawn) {
+  object oArea = GetArea(oSpawn);
+  string sSwitch = GetLocalString(oArea, GetTag(oSpawn));
+
+  if(GetStringLength(sSwitch) > 0) {
+    __processSpawnByTag(oSpawn, sSwitch);
+  }
+}
+
+///////////////////////////////////////////////////////////
+// Conditional spawn - Checker functions               ////
+///////////////////////////////////////////////////////////
+void __performCheckHP(int iHP, string sSpawn, object oBoss, int iOneshot, object oSpawner);
+
+void __performCheckHP(int iHP, string sSpawn, object oBoss, int iOneshot, object oSpawner) {
+//  WriteTimestampedLogEntry("BOSS CHECKHP "+GetName(oBoss)+" for "+IntToString(iHP));
+  if(!GetIsObjectValid(oBoss))
+    return;
+
+  if( GetCurrentHitPoints(oBoss) < iHP) {
+    __processSpawnByTag(oSpawner, sSpawn);
+    WriteTimestampedLogEntry("BOSS CHECKHP "+GetName(oBoss)+" for "+IntToString(iHP)+" run spawn "+sSpawn);
+    if(iOneshot)
+     return;
+  }
+
+  DelayCommand(1.0, __performCheckHP(iHP, sSpawn, oBoss, iOneshot, oSpawner));
+}
+
+void LOCK_BossCheckerCheckHP(object oBoss, object oSpawner) {
+  int iHP = GetLocalInt(oSpawner, "MIN_HP");
+  string sSpawn = GetLocalString(oSpawner, "SPAWN");
+  int iOneshot = GetLocalInt(oSpawner, "ONESHOT");
+//  object oBoss = GetLocalObject(OBJECT_SELF, "__LOCK_BOSS");
+
+  DelayCommand(3.0, __performCheckHP(iHP, sSpawn, oBoss, iOneshot, oSpawner));
+
+}
 

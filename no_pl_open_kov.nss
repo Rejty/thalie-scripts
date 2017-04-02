@@ -25,9 +25,9 @@ void main()
 no_oPC=GetLastOpenedBy();
 
 //doplnena perzistence 5.5.2014
-if  (GetLocalInt(OBJECT_SELF,"no_prvni_otevreni")==0)   {
+/*if  (GetLocalInt(OBJECT_SELF,"no_prvni_otevreni")==0)   {
       SetLocalInt(OBJECT_SELF,"no_prvni_otevreni",1);
-      Persist_OnContainerOpen(OBJECT_SELF, no_oPC);             }
+      Persist_OnContainerOpen(OBJECT_SELF, no_oPC);             } */
 ///////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -58,9 +58,9 @@ no_znicit(no_oPC);
 no_reopen(no_oPC);
 
 
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_krouz"),"Krouzkova zbroj"));
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_hrudn"),"Destickova zbroj"));
-DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_desti"),"Pancir"));
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_krouz"),"Krouzkova kosile"));
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_hrudn"),"Hrudni pancir"));
+DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_desti"),"Destickova zbroj"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_pulpl"),"Polovicni platova zbroj"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_plnpl"),"Plna platova zbroj"));
 DelayCommand(0.1,SetName(CreateItemOnObject("prepinac001",OBJECT_SELF,1,"no_vyr_helma"),"Helma"));
@@ -74,17 +74,17 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac002",OBJECT_SELF,1,"no_vzhl
  else
    if(no_menu == 1)
    {
- FloatingTextStringOnCreature("Krouzkova zbroj",no_oPC,FALSE );
+ FloatingTextStringOnCreature("Krouzkova kosile",no_oPC,FALSE );
  }
  else
    if(no_menu == 2)
    {
- FloatingTextStringOnCreature("Destickova zbroj",no_oPC,FALSE );
+ FloatingTextStringOnCreature("Hrudni pancir",no_oPC,FALSE );
  }
  else
    if(no_menu == 3)
    {
- FloatingTextStringOnCreature("Pancir",no_oPC,FALSE );
+ FloatingTextStringOnCreature("Destickova zbroj",no_oPC,FALSE );
 
  }
  else

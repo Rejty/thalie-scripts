@@ -28,12 +28,15 @@ void main()
 //15 - vyroba katana       tag: no_vyr_ka
 //16 - vyroba rapir        tag: no_vyr_ra
 //17 - vyroba scimitar     tag: no_vyr_sc
+//18 - vyroba rt.obri mec  tag: no_vyr_y1
+//19 - vyroba rtut dlouhy  tag: no_vyr_y2
 //////////////////////////
 //20 - vyroba halapart     tag: no_vyr_ha
 //21 - vyroba kopi         tag: no_vyr_ko
 //22 - vyroba kosa         tag: no_vyr_ks
 //23 - vyroba trident      tag: no_vyr_tr
 //24 - vyroba hole         tag: no_vyr_hu
+//25 - vyroba jednorucniho kopi         tag: no_vyr_ss
 /////////////////////////
 //31 - vyroba bice         tag: no_vyr_bc
 //32 - vyroba kamy         tag: no_vyr_km
@@ -66,8 +69,8 @@ void main()
 //74 - vyroba sap          tag: no_vyr_x6
 //75 - vyroba ob.scimi     tag: no_vyr_x7
 //76 - vyroba tezky pal.   tag: no_vyr_x8
-//77 - vyroba rt.obri mec  tag: no_vyr_y1
-//78 - vyroba rtut dlouhy  tag: no_vyr_y2
+//77 - vyroba krumpac      tag: no_vyr_hp
+//78 - vyroba lehky krumpac  tag: no_vyr_lp
 //79 - vyroba maug dv. mec tag: no_vyr_y3
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -100,9 +103,9 @@ void main()
 no_oPC=GetLastOpenedBy();
 
 //doplnena perzistence 5.5.2014
-if  (GetLocalInt(OBJECT_SELF,"no_prvni_otevreni")==0)   {
+/*if  (GetLocalInt(OBJECT_SELF,"no_prvni_otevreni")==0)   {
       SetLocalInt(OBJECT_SELF,"no_prvni_otevreni",1);
-      Persist_OnContainerOpen(OBJECT_SELF, no_oPC);             }
+      Persist_OnContainerOpen(OBJECT_SELF, no_oPC);             } */
 ///////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -245,6 +248,8 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac002",OBJECT_SELF,1,"no_vzhl
      case 15: {FloatingTextStringOnCreature(" Vyroba katany ",no_oPC,FALSE );    break;  }
      case 16: {FloatingTextStringOnCreature(" Vyroba rapiru ",no_oPC,FALSE );    break;  }
      case 17: {FloatingTextStringOnCreature(" Vyroba scimitaru ",no_oPC,FALSE );    break;  }
+     case 18: {FloatingTextStringOnCreature(" Vyroba rtutoveho obriho mece ",no_oPC,FALSE );    break;  }
+     case 19: {FloatingTextStringOnCreature(" Vyroba rtutoveho dlouheho mece ",no_oPC,FALSE );    break;  }
          }//konec switche
  }
  else
@@ -259,6 +264,7 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac002",OBJECT_SELF,1,"no_vzhl
      case 23: {FloatingTextStringOnCreature(" Vyroba trojzubce ",no_oPC,FALSE );    break;  }
      //24 - vyroba hole         tag: no_vyr_hu
      case 24: {FloatingTextStringOnCreature(" Vyroba hole",no_oPC,FALSE );    break;  }
+     case 25: {FloatingTextStringOnCreature(" Vyroba jednorucniho kopi",no_oPC,FALSE );    break;  }
          }//konec switche
  }
  else
@@ -319,8 +325,8 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac002",OBJECT_SELF,1,"no_vzhl
 //74 - vyroba sap          tag: no_vyr_x6
 //75 - vyroba ob.scimi     tag: no_vyr_x7
 //76 - vyroba tezky pal.   tag: no_vyr_x8
-//77 - vyroba rt.obri mec  tag: no_vyr_y1
-//78 - vyroba rtut dlouhy  tag: no_vyr_y2
+//18 - vyroba rt.obri mec  tag: no_vyr_y1
+//19 - vyroba rtut dlouhy  tag: no_vyr_y2
 //79 - vyroba maug dv. mec tag: no_vyr_y3
    if( (no_menu > 69)& (no_menu< 80) )
    {
@@ -333,8 +339,8 @@ DelayCommand(0.1,SetName(CreateItemOnObject("prepinac002",OBJECT_SELF,1,"no_vzhl
      case 74: {FloatingTextStringOnCreature(" Vyroba sap ",no_oPC,FALSE );             break;  }
      case 75: {FloatingTextStringOnCreature(" Vyroba obourucniho scimitaru",no_oPC,FALSE );    break;  }
      case 76: {FloatingTextStringOnCreature(" Vyroba tezkeho palcatu ",no_oPC,FALSE );    break;  }
-     case 77: {FloatingTextStringOnCreature(" Vyroba rtutoveho obriho mece ",no_oPC,FALSE );    break;  }
-     case 78: {FloatingTextStringOnCreature(" Vyroba rtutoveho dlouheho mece ",no_oPC,FALSE );    break;  }
+     case 77: {FloatingTextStringOnCreature(" Vyroba krumpace ",no_oPC,FALSE );    break;  }
+     case 78: {FloatingTextStringOnCreature(" Vyroba lehkeho krumpace ",no_oPC,FALSE );    break;  }
      case 79: {FloatingTextStringOnCreature(" Vyroba maugova dvojiteho mece ",no_oPC,FALSE );    break;  }
          }//konec switche
  }

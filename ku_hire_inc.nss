@@ -13,7 +13,7 @@
 #include "ku_libtime"
 #include "aps_include"
 
-const int HIRE_TIME = 30;
+const int HIRE_TIME = 3600; // 60min real
 const int HIRE_PRICE = 20;
 const string HIRE_KEY_TAG = "ku_hire_key";
 
@@ -264,12 +264,20 @@ int ku_HireGetIsKeyExpired(object oKey) {
     return FALSE;
   }
 
-  if(GetStringLeft(GetTag(oKey),8) != "ku_hire_")
+  /* Boss keys */
+  int iTrofejTimestamp = GetLocalInt(oKey,"TROFEJ_TIMESTAMP");
+
+  if(GetStringLeft(GetTag(oKey),8) != "ku_hire_" || iTrofejTimestamp > 0)
     return FALSE;
 
   if(ku_GetTimeStamp() > GetLocalInt(oKey,"KU_HIRE_EXPIRATION")) {
     return TRUE;
   }
+
+  /* Keys from bosses - old*/
+  if((iTrofejTimestamp > 0) && (iTrofejTimestamp + 2592000 < ku_GetTimeStamp()))
+    return TRUE;
+
   return FALSE;
 }
 
@@ -293,10 +301,10 @@ int ku_HireCheckHireLeft(object oKey) {
   int iLeft = (iExpiration - iActual)/FloatToInt(HoursToSeconds(1))/24; //To IC days
   if(iLeft > 0)
     sLeft = IntToString(iLeft)+" dni";
-  iLeft = (iExpiration - iActual)/FloatToInt(HoursToSeconds(1)); //To IC hours
+  iLeft = ((iExpiration - iActual) /FloatToInt(HoursToSeconds(1))) % 24; //To IC hours
   if(iLeft > 0)
     sLeft = sLeft+" "+IntToString(iLeft)+" hodin";
-  iLeft = (iExpiration - iActual)/FloatToInt(HoursToSeconds(1)/60.0); //To IC minutes
+  iLeft = ((iExpiration - iActual) /FloatToInt(HoursToSeconds(1)/60.0)) % 60; //To IC minutes
   if(iLeft > 0)
     sLeft = sLeft+" "+IntToString(iLeft)+" minut";
 

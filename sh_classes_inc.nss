@@ -25,6 +25,9 @@ Pridavam hracum kuzi s tagem th_pl_skin
 // Vraci o kolik se zvednou staty pri barbarove rage
 int GetBarbarianAbilityBonus(object oPC);
 
+// * Hub function for the epic barbarian feats that upgrade rage. Call from
+// * the end of the barbarian rage spellscript
+void CheckAndApplyEpicRageFeats(int nRounds);
 
 
 
@@ -57,7 +60,12 @@ int GetBarbarianAbilityBonus(object oPC);
 //Zvetsi barbarovy staty
 void IncreaseBarbarStats(object oPC,int iAbility)
 {
-          object oSaveItem = GetSoulStone(oPC);
+    object oSaveItem;
+    if(GetIsPC(OBJECT_SELF) && !GetIsDMPossessed(OBJECT_SELF) )
+      oSaveItem = GetSoulStone(OBJECT_SELF);
+    else
+      oSaveItem = OBJECT_SELF;
+
           int level = GetLevelByPosition(1,oPC)+GetLevelByPosition(2,oPC)+GetLevelByPosition(3,oPC);
           SetLocalInt(oSaveItem,AKTIVNI_RAGE,1);
           int base_str = GetAbilityScore(oPC,ABILITY_STRENGTH,TRUE);
@@ -77,7 +85,11 @@ void IncreaseBarbarStats(object oPC,int iAbility)
  //Snizi barbarovy staty
 void DecreaseBarbarStats(object oPC)
 {
-    object oSaveItem = GetSoulStone(oPC);
+    object oSaveItem;
+    if(GetIsPC(OBJECT_SELF) && !GetIsDMPossessed(OBJECT_SELF) )
+      oSaveItem = GetSoulStone(OBJECT_SELF);
+    else
+      oSaveItem = OBJECT_SELF;
 
     if (GetLocalInt(oSaveItem,AKTIVNI_RAGE) == 1)
     {
@@ -98,7 +110,11 @@ void DecreaseBarbarStats(object oPC)
 //Zvetsi TRPASLICIHO OBRANCE
 void IncreaseDefenderStats(object oPC,int iAbility_str, int iAbility_con)
 {
-    object oSaveItem = GetSoulStone(oPC);
+    object oSaveItem;
+    if(GetIsPC(OBJECT_SELF) && !GetIsDMPossessed(OBJECT_SELF) )
+      oSaveItem = GetSoulStone(OBJECT_SELF);
+    else
+      oSaveItem = OBJECT_SELF;
 
     if (GetLocalInt(oSaveItem,AKTIVNI_POSTOJ_OBRANCE) == 0)
     {
@@ -122,7 +138,11 @@ void IncreaseDefenderStats(object oPC,int iAbility_str, int iAbility_con)
  //Snizi staty TRPASLICIHO OBRANCE
 void DecreaseDefenderStats(object oPC)
 {
-    object oSaveItem = GetSoulStone(oPC);
+    object oSaveItem;
+    if(GetIsPC(OBJECT_SELF) && !GetIsDMPossessed(OBJECT_SELF) )
+      oSaveItem = GetSoulStone(OBJECT_SELF);
+    else
+      oSaveItem = OBJECT_SELF;
 
     if (GetLocalInt(oSaveItem,AKTIVNI_POSTOJ_OBRANCE) == 1)
     {
@@ -149,26 +169,33 @@ void ApplyBarbarianDamageReduction(object oPC)
 {
     if (GetHasFeat(FEAT_SNIZENI_ZRANENI_BARBAR,oPC) == TRUE)
     {
-        int bonus = 0;
-        if (GetHasFeat(FEAT_EPICKE_SNIZENI_ZRANENI_BARBAR_1,oPC) == TRUE)
-        {
-            bonus = 5;
-        }
-        if (GetHasFeat(FEAT_EPICKE_SNIZENI_ZRANENI_BARBAR_2,oPC) == TRUE)
-        {
-            bonus = 10;
-        }
+        int iBonus = 0;
         if (GetHasFeat(FEAT_EPICKE_SNIZENI_ZRANENI_BARBAR_3,oPC) == TRUE)
         {
-            bonus = 15;
+            iBonus = 30;
         }
-        int lvl = GetLevelByClass(CLASS_TYPE_BARBARIAN,oPC);
+        else if (GetHasFeat(FEAT_EPICKE_SNIZENI_ZRANENI_BARBAR_2,oPC) == TRUE)
+        {
+            iBonus = 20;
+        }
+        else if (GetHasFeat(FEAT_EPICKE_SNIZENI_ZRANENI_BARBAR_1,oPC) == TRUE)
+        {
+            iBonus = 10;
+        }
+        int iLvL = GetLevelByClass (CLASS_TYPE_BARBARIAN,oPC)+1;
+
+                if (iLvL > 20)
+                   {
+                    iLvL = 20;
+                   }
+
+
         //pridani imunuty na tupe
-        effect ef1 = EffectDamageImmunityIncrease(DAMAGE_TYPE_BLUDGEONING,lvl+bonus);
+        effect ef1 = EffectDamageImmunityIncrease(DAMAGE_TYPE_BLUDGEONING,iLvL+iBonus);
          //pridani imunuty na bodne
-        effect ef2 = EffectDamageImmunityIncrease(DAMAGE_TYPE_PIERCING,lvl+bonus);
+        effect ef2 = EffectDamageImmunityIncrease(DAMAGE_TYPE_PIERCING,iLvL+iBonus);
          //pridani imunuty na tupe
-        effect ef3 = EffectDamageImmunityIncrease(DAMAGE_TYPE_SLASHING,lvl+bonus);
+        effect ef3 = EffectDamageImmunityIncrease(DAMAGE_TYPE_SLASHING,iLvL+iBonus);
         effect eLink = EffectLinkEffects(ef1,ef2);
                eLink =  EffectLinkEffects(eLink,ef3);
                eLink = SupernaturalEffect(eLink);
@@ -181,32 +208,6 @@ void ApplyBarbarianDamageReduction(object oPC)
 Shodi Kensaiovi Itemy pokud si oblece zbroj, stit nebo helmu
 */
 
-
-void ApplyKensaiLimitation(object oPC,object oItem)
-{
-    return;
-    int sundani =FALSE;
-    if (GetLevelByClass(CLASS_TYPE_WEAPON_MASTER,oPC) > 0)
-    {
-        //zhozeni stitu
-        if ((GetBaseItemType(oItem) == BASE_ITEM_TOWERSHIELD) || (GetBaseItemType(oItem) == BASE_ITEM_LARGESHIELD) || (GetBaseItemType(oItem) == BASE_ITEM_SMALLSHIELD))
-        {
-            sundani = TRUE;
-        }
-
-        //zhozeni zbroje
-        if (GetBaseItemType(oItem) == BASE_ITEM_ARMOR)
-        {
-             if (GetArcaneSpellFailure(oPC)>0)sundani = TRUE;
-        }
-
-        //samotne zhozeni
-        if (sundani == TRUE)
-        {
-            AssignCommand(oPC,ActionUnequipItem(oItem));
-         }
-    }
-}
 
 /*
 Nastavi SD Zrak stinu
@@ -228,32 +229,41 @@ void ApplyShadowDancerZrak(object oPC)
 void ApplyNewMonkPerfectSelf(object oPC, object oPCSkin)
 {
     //odstraneni efektu
-    if (GetHasFeat(FEAT_NEWPERFECTSELF,oPC) == TRUE)
+    if (GetLevelByClass(CLASS_TYPE_MONK,oPC) >= 19)
     {
 
-        int lvl = GetLevelByClass(CLASS_TYPE_MONK,oPC);
-        int iBonus = ((lvl-19) /10)+1;
         int iEnch;
         // IMUNITA NA MIND SPELLY
         itemproperty ip = ItemPropertyImmunityMisc(IP_CONST_IMMUNITYMISC_MINDSPELLS);
         SetItemPropertySpellId(ip,IP_NEWPERFECTSELF);
         AddItemProperty(DURATION_TYPE_TEMPORARY,ip,oPCSkin,99999.0);
         //POHLCENI
-        switch (iBonus)
-        {
-            case 1:
-            iEnch =IP_CONST_DAMAGEREDUCTION_1;
-            break;
-            case 2:
-            iEnch =IP_CONST_DAMAGEREDUCTION_2;
-            break;
-            case 3:
-            iEnch =IP_CONST_DAMAGEREDUCTION_3;
-            break;
-            default:
-            iEnch =IP_CONST_DAMAGEREDUCTION_1;
 
-        }
+
+            if (GetHasFeat(FEAT_NEWPERFECTSELF5,oPC))
+            {
+             iEnch =IP_CONST_DAMAGEREDUCTION_5;
+            }
+
+            else if (GetHasFeat(FEAT_NEWPERFECTSELF4,oPC))
+            {
+             iEnch =IP_CONST_DAMAGEREDUCTION_4;
+            }
+
+            else if (GetHasFeat(FEAT_NEWPERFECTSELF3,oPC))
+            {
+             iEnch =IP_CONST_DAMAGEREDUCTION_3;
+            }
+
+            else if (GetHasFeat(FEAT_NEWPERFECTSELF2,oPC))
+            {
+             iEnch =IP_CONST_DAMAGEREDUCTION_2;
+            }
+            else
+            {
+             iEnch =IP_CONST_DAMAGEREDUCTION_1;
+            }
+
         itemproperty ip1 = ItemPropertyDamageReduction(iEnch,IP_CONST_DAMAGESOAK_20_HP);
         SetItemPropertySpellId(ip1,IP_NEWPERFECTSELF);
         AddItemProperty(DURATION_TYPE_TEMPORARY,ip1,oPCSkin,99999.0);
@@ -314,41 +324,9 @@ void AddZbranThalie(object oPC,object oItem)
 
         //zhozeni stitu
         int iType =GetBaseItemType(oItem);
-        if (
-        (iType == BASE_ITEM_BASTARDSWORD) || (iType == BASE_ITEM_BATTLEAXE) || (iType == BASE_ITEM_DAGGER)
-        || (iType == BASE_ITEM_DART)|| (iType == BASE_ITEM_DIREMACE)|| (iType == BASE_ITEM_DOUBLEAXE)
-        || (iType == BASE_ITEM_DWARVENWARAXE)|| (iType == BASE_ITEM_GREATAXE)|| (iType == BASE_ITEM_GREATSWORD)
-        || (iType == BASE_ITEM_HALBERD)|| (iType == BASE_ITEM_HANDAXE)|| (iType == BASE_ITEM_HEAVYCROSSBOW)
-        || (iType == BASE_ITEM_HEAVYFLAIL)|| (iType == BASE_ITEM_KAMA)|| (iType == BASE_ITEM_KATANA)
-        || (iType == BASE_ITEM_KUKRI)|| (iType == BASE_ITEM_LIGHTCROSSBOW)|| (iType == BASE_ITEM_LIGHTFLAIL)
-        || (iType == BASE_ITEM_LIGHTHAMMER)|| (iType == BASE_ITEM_LIGHTMACE)|| (iType == BASE_ITEM_LONGBOW)
-        || (iType == BASE_ITEM_LONGSWORD)|| (iType == BASE_ITEM_MAGICSTAFF)|| (iType == BASE_ITEM_MORNINGSTAR)
-        || (iType == BASE_ITEM_QUARTERSTAFF)|| (iType == BASE_ITEM_RAPIER)|| (iType == BASE_ITEM_SCIMITAR)
-        || (iType == BASE_ITEM_SCYTHE)|| (iType == BASE_ITEM_SHORTBOW)|| (iType == BASE_ITEM_SHORTSPEAR)
-        || (iType == BASE_ITEM_SHORTSWORD)|| (iType == BASE_ITEM_SHURIKEN)|| (iType == BASE_ITEM_SICKLE)
-        || (iType == BASE_ITEM_SLING)|| (iType == BASE_ITEM_THROWINGAXE)|| (iType == BASE_ITEM_TRIDENT)
-        || (iType == BASE_ITEM_TWOBLADEDSWORD) || (iType == BASE_ITEM_WARHAMMER) || (iType == BASE_ITEM_WHIP)
-        || (iType == 202)// Social_Beermug
-        || (iType ==203)// Short Spear
-          || (iType ==300)// Trident 1h
-          || (iType ==301)// Heavypick
-          || (iType ==302)// Lightpick
-          || (iType ==303)// Sai (vidlicka)
-          || (iType ==304)// Nunchaku
-          || (iType ==305)// Falchion
-          || (iType ==308)// Sap (Pytlik)
-          || (iType ==309)// Daggerassassin
-          || (iType ==310)// Katar
-          || (iType ==317)// Heavy mace
-          || (iType ==318)// Maul
-          || (iType ==319)// Mercurial_longsword
-          || (iType ==320)// Mercurial_greatsword
-          || (iType ==321)// Scimitar double
-          || (iType ==322)// Goad (halapartma)
-          || (iType ==323)// Windfirewheel
-          || (iType ==324)// MauDoubleSword
-        )
-        {
+        int iWeaponType = StringToInt(Get2DAString("baseitems","WeaponType",iType));
+        if(iWeaponType > 0) {
+
             itemproperty ipLoop = GetFirstItemProperty(oItem);
             while (GetIsItemPropertyValid(ipLoop))
             {
@@ -426,7 +404,7 @@ void RefreshOnEquipSpecialBonuses(object oPC,int iEquip)
     while (GetIsEffectValid(eLoop))
     {
         iEffect = GetEffectSpellId(eLoop);
-        if (iEffect== EFFECT_BRUTALNI_VRH || iEffect==EFFECT_SPRAVEDLIVY_UDER)
+        if ((iEffect== EFFECT_BRUTALNI_VRH) || (iEffect==EFFECT_SPRAVEDLIVY_UDER) || (iEffect==EFFECT_EXOR_DAMAGE_DIVINE))
         {
             RemoveEffect(oPC,eLoop);
         }
@@ -452,10 +430,22 @@ void RefreshOnEquipSpecialBonuses(object oPC,int iEquip)
             SetEffectSpellId(eLink,EFFECT_SPRAVEDLIVY_UDER);
             ApplyEffectToObject(DURATION_TYPE_PERMANENT, eLink,oPC);
         }
+            /*Exorcistuv dmg divine*/
+        if (GetHasFeat(FEAT_EXORCISTA_ZHOUBA_ZLA,oPC))
+        {
+         int iWis = GetAbilityModifier(ABILITY_WISDOM,oPC);
+         int iDamage = GetDamageBonusByValue(iWis);
+         effect ef = EffectDamageIncrease(iDamage,DAMAGE_TYPE_DIVINE);
+         effect eEvil = VersusAlignmentEffect(ef,ALIGNMENT_ALL,ALIGNMENT_EVIL);
+         effect eLink = EffectLinkEffects(ef, eEvil);
+         eLink = SupernaturalEffect(eLink);
+         SetEffectSpellId(eLink,EFFECT_EXOR_DAMAGE_DIVINE);
+         ApplyEffectToObject(DURATION_TYPE_PERMANENT, eLink,oPC);
 
+        }
+        
+               
     }
-
-
 }
 
 void ApplyFeats(object oPC)
@@ -597,7 +587,89 @@ void ApplyFeats(object oPC)
 }
 
 
+//Odstrani efekty postoje trpasliciho obrance
+void DD_RemoveStance(object oPC,object oSoulStone)
+{
+    effect eLoop=GetFirstEffect(oPC);
+    while (GetIsEffectValid(eLoop))
+    {
+        if (GetEffectSpellId(eLoop)==EFFECT_TRPASLICI_OBRANCE_POSTOJ)
+        {
+            RemoveEffect(oPC, eLoop);
+        }
+        eLoop=GetNextEffect(oPC);
 
+    }
+    itemproperty ipLoop=GetFirstItemProperty(oSoulStone);
+    while (GetIsItemPropertyValid(ipLoop))
+    {
+        if ((GetItemPropertySpellId(ipLoop)==IP_DD_STANCE) || (GetItemPropertyType(ipLoop)==ITEM_PROPERTY_WEIGHT_INCREASE))
+        {
+
+            RemoveItemProperty(oSoulStone, ipLoop);
+        }
+        ipLoop=GetNextItemProperty(oSoulStone);
+
+    }
+    DecreaseDefenderStats(oPC);
+    SendMessageToPC(oPC,"Obrany postoj deaktivovan!");
+}
+
+//Nastavi promenne na postavu tak aby bylo mozne brat prestizni povolani
+void ApplyClassConditions(object oPC)
+{
+    //kontrola rasy u AA
+    int iRace = GetRacialType(oPC);
+    if (((iRace == RACIAL_TYPE_HALFELF) &&  Subraces_GetCharacterSubrace(oPC)==SUBRACE_HALFELF)   ||
+       (iRace == RACIAL_TYPE_ELF))
+       {
+            SetLocalInt(oPC,"X1_AllowArcher",1);
+       }
+
+}
+//Odstrani featy - pro rizeni specialnich schopnosti na konkretnich lvlech
+void RemoveClassFeats(object oPC)
+{
+    if (GetLevelByClass(CLASS_TYPE_DRUID,oPC) >=8)
+    {
+        RemoveKnownFeat(oPC,FEAT_DRUID_SPECIALIZACE_VYBER);
+    }
+}
+
+
+//------------------------------------------------------------------------------
+// GZ, 2003-07-09
+// Hub function for the epic barbarian feats that upgrade rage. Call from
+// the end of the barbarian rage spellscript
+//------------------------------------------------------------------------------
+void CheckAndApplyEpicRageFeats(int nRounds)
+{
+
+	effect eAOE;
+    if ((GetHasFeat(989, OBJECT_SELF)) && (GetHasFeat(988, OBJECT_SELF)))
+    {
+     eAOE = EffectAreaOfEffect(AOE_MOB_FEAR,"cl_barb_terrage", "cl_barb_thunrage","****");
+     eAOE = ExtraordinaryEffect(eAOE);
+     ApplyEffectToObject(DURATION_TYPE_TEMPORARY,eAOE,OBJECT_SELF,RoundsToSeconds(nRounds));
+    }
+
+    else if (GetHasFeat(989, OBJECT_SELF))
+    {
+     eAOE = EffectAreaOfEffect(AOE_MOB_FEAR,"cl_barb_terrage", "****","****");
+     eAOE = ExtraordinaryEffect(eAOE);
+     ApplyEffectToObject(DURATION_TYPE_TEMPORARY,eAOE,OBJECT_SELF,RoundsToSeconds(nRounds));
+    }
+
+    else if (GetHasFeat(988, OBJECT_SELF))
+    {
+     eAOE = EffectAreaOfEffect(AOE_MOB_FEAR,"****", "cl_barb_thunrage","****");
+     eAOE = ExtraordinaryEffect(eAOE);
+     ApplyEffectToObject(DURATION_TYPE_TEMPORARY,eAOE,OBJECT_SELF,RoundsToSeconds(nRounds));
+    }
+	
+	
+	
+}
 
 
 
@@ -629,7 +701,7 @@ void OnLvlupClassSystem(object oPC)
    object oPCSkin = GetPCSkin(oPC);
    //vymazani bonusu
    RemoveClassItemPropertyAndEffects(oPC,oPCSkin);
-
+   RemoveClassFeats(oPC);
    //  puvodni
    ApplyBarbarianDamageReduction(oPC);  //effekt
    ApplyShadowDancerZrak(oPC);//effekt
@@ -669,7 +741,6 @@ void OnEquipClassSystem(object oPC, object oItem)
   object oDuse = GetSoulStone(oPC);
    object oPCSkin = GetPCSkin(oPC);
 
- ApplyKensaiLimitation( oPC,oItem);
  AddZbranThalie(oPC,oItem);
  RefreshBonusACNaturalBase(oPC,oPCSkin);
  RefreshOnEquipSpecialBonuses(oPC,1);
@@ -700,6 +771,7 @@ void OnDeathClassSystem(object oPC)
 void OnEnterClassSystem(object oPC)
 {
     //ReequipSkin(oPC);
+    ApplyClassConditions(oPC);
     ApplyFeats(oPC);
     DeleteLocalString(oPC,"OZNACEN"); //odstraneni znacky assassina
     DeleteLocalInt(oPC,"UderDoTepny"); //zruseni ucinku krvaceni

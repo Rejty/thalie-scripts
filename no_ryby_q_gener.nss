@@ -37,12 +37,12 @@ no_oPC = GetPCSpeaker();
                 return;
 
                 if(Random(100) > 85) { //  Vygeneruj quest s 25% sanci
-                SetLocalInt(OBJECT_SELF,"obch_q_lastquest",ku_GetTimeStamp(0,100));
-                                             //100 minut v pripade ze zadny quest neni
+                SetLocalInt(OBJECT_SELF,"obch_q_lastquest",ku_GetTimeStamp(0,10));
+                                             //10 minut v pripade ze zadny quest neni
                 return;
                                     }
 
-    no_nahoda = 1 + Random(pocet_surovin); // pocet je v no_koze_q_inc
+    no_nahoda = 1 + Random(pocet_surovin); // pocet je v no_ryby_q_inc
 
     SetLocalInt(OBJECT_SELF,"no_poptavka",no_nahoda);
     switch(no_nahoda) {
@@ -50,14 +50,15 @@ no_oPC = GetPCSpeaker();
 case id_kapr: SetLocalString(OBJECT_SELF,"no_nazevveci",resref_kapr); break;
 case id_kaprik: SetLocalString(OBJECT_SELF,"no_nazevveci",resref_kaprik); break;
 case id_masokraba: SetLocalString(OBJECT_SELF,"no_nazevveci",resref_masokraba); break;
-case id_masoobrkraba: SetLocalString(OBJECT_SELF,"no_nazevveci",resref_kaprik); break;
+case id_modrinka: SetLocalString(OBJECT_SELF,"no_nazevveci",resref_modrinka); break;
 case id_okoun : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_okoun); break;
 case id_pstruh : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_pstruh); break;
 case id_rak : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_rak); break;
 case id_treska : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_treska); break;
 case id_uhor: SetLocalString(OBJECT_SELF,"no_nazevveci",resref_uhor); break;
 case id_zralok : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_zralok); break;
-
+case id_cejn : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_cejn); break;
+case id_lin : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_lin); break;
 
 
 
@@ -69,6 +70,6 @@ case id_zralok : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_zralok); break
     SendMessageToPC(no_oPC, "//debug info: bylo vygenerovano : " + no_nazev);
     no_nahoda = 2 + Random(5); //vygeneruje kolik toho chce
     SetLocalInt(OBJECT_SELF,"no_pocetveci",no_nahoda);                   // zapamatuje si tenhle quest :
-    SetLocalInt(OBJECT_SELF,"obch_q_lastquest",ku_GetTimeStamp(0,300)); //  300 minut
-   }                                                                    //  =4hod REAL
+    SetLocalInt(OBJECT_SELF,"obch_q_lastquest",ku_GetTimeStamp(0,60)); //  60 minut
+   }                                                                    //  =1hod REAL
 }

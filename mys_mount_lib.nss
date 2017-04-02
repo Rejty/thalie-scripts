@@ -5,6 +5,7 @@
 // Pridat rovnou info o klici (store object), kvuli restore uses, abych nemusle jen kvuli tomu porad includovat knihovnu henchmanu
 
 #include "me_soul_inc"
+#include "nwnx_funcs"
 
 // Mount creature tag
 const string MOUNT_TAG = "mount";
@@ -247,6 +248,7 @@ void Dismount(object oRider, object oSoul, int bSummonMount)
         DeleteLocalInt(oSoul, "MOUNT_PHENOTYPE_L");
         DeleteLocalInt(oSoul, "MOUNT_SPEED");
     }
+    SetMovementRate(oRider,MOVEMENT_RATE_PC);
 }
 
 void ApplyMountedSpeed(object oRider, int iSpeed)
@@ -313,12 +315,25 @@ void RemoveMountedEffects(object oRider)
 
 int GetMountedRaceAppearance(object oRider)
 {
-    return 482 + GetRacialType(oRider) * 2 + !GetGender(oRider);
+    int iRacialType = GetRacialType(oRider);
+
+    /* Outsiders could be humans too :) */
+    if(iRacialType == RACIAL_TYPE_OUTSIDER &&
+       GetAppearanceType(oRider) == APPEARANCE_TYPE_HUMAN)
+      iRacialType = RACIAL_TYPE_HUMAN;
+
+    return 482 + iRacialType * 2 + !GetGender(oRider);
 }
 
 int GetMountedNullAppearance(object oRider)
 {
-    return 562 + GetRacialType(oRider);
+    int iRacialType = GetRacialType(oRider);
+    /* Outsiders could be humans too :) */
+    if(iRacialType == RACIAL_TYPE_OUTSIDER &&
+       GetAppearanceType(oRider) == APPEARANCE_TYPE_HUMAN)
+      iRacialType = RACIAL_TYPE_HUMAN;
+
+    return 562 + iRacialType;
 }
 
 int GetIsMounted(object oPC) {

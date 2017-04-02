@@ -1,14 +1,14 @@
 //::///////////////////////////////////////////////
-//:: FileName dat_klic2_ssap
+//:: FileName zz_wis_max13
 //:://////////////////////////////////////////////
 //:://////////////////////////////////////////////
 //:: Created By: Script Wizard
-//:: Created On: 15.5.2014 22:13:14
+//:: Created On: 6.4.2015 12:12:12
 //:://////////////////////////////////////////////
-void main()
+int StartingConditional()
 {
-    // Dát mluvcímu predmet
-    CreateItemOnObject("fk_klic_ssap6_ss", GetPCSpeaker(), 1);
+	if(!(GetAbilityScore(GetPCSpeaker(), ABILITY_WISDOM) < 13))
+		return FALSE;
 
+	return TRUE;
 }
-

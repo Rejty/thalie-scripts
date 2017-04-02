@@ -40,7 +40,7 @@ SetLocalInt(OBJECT_SELF,"no_moridlo",57);
 //1 - sekani               tag:no_sekani
 //2 - deska                tag:no_vyr_deska
 //3 - lat                  tag:no_vyr_lat
-//4 - nasada               tag:no_vyr_nasada
+//4 - rukojet            tag:no_vyr_nasada
 //0 - zpet na start        tag:no_zpet
 //
 //////////////////////////
@@ -75,8 +75,6 @@ case 4:   {
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-TC_dr_VLASTNOST  = GetAbilityScore(no_oPC, ABILITY_STRENGTH,TRUE);
-
 /////////////polotovar//////////////////////////////////////////////////////
 no_Item = GetFirstItemInInventory(OBJECT_SELF);
 while (GetIsObjectValid(no_Item)) {
@@ -102,7 +100,7 @@ if (GetResRef(no_Item) == "no_polot_dr") {
                             //////////predelavka 1.9.2014/////////
                 if (no_pocet_cyklu == 9) {
                 DeleteAllInContainer(OBJECT_SELF); //smazu vse z kontejneru
-                Persist_SaveItemToDB(no_Item, Persist_InitContainer(OBJECT_SELF)); //ulozim tam novou vec.
+//                Persist_SaveItemToDB(no_Item, Persist_InitContainer(OBJECT_SELF)); //ulozim tam novou vec.
 
             SetLocalInt(no_Item,"no_pocet_cyklu",no_pocet_cyklu);
             no_zamkni(no_oPC);
@@ -207,7 +205,7 @@ case 3:   {        if ( GetLocalInt(OBJECT_SELF,"no_osekane") == GetLocalInt(OBJ
           break;}  //konec case 3
 
 case 4:   {        if ( GetLocalInt(OBJECT_SELF,"no_osekane") == GetLocalInt(OBJECT_SELF,"no_moridlo")   ) {
-        FloatingTextStringOnCreature(" Snazis se osekat drevo do tvaru nasady ",no_oPC,FALSE );
+        FloatingTextStringOnCreature(" Snazis se osekat drevo do tvaru rukojeti ",no_oPC,FALSE );
                     no_zamkni(no_oPC);
                     no_osekane(no_Item,OBJECT_SELF,TRUE);
                     no_moridlo(no_Item,OBJECT_SELF,TRUE);
@@ -217,7 +215,7 @@ case 4:   {        if ( GetLocalInt(OBJECT_SELF,"no_osekane") == GetLocalInt(OBJ
         }  //konec kdyz mame vse na nasady
 
         if ( (GetLocalInt(OBJECT_SELF,"no_osekane") != GetLocalInt(OBJECT_SELF,"no_moridlo"))&( GetLocalInt(OBJECT_SELF,"no_osekane") != 56)) {
-            FloatingTextStringOnCreature(" Pro nasadu je nutne umistit do spalku osekane drevo a shodne moridlo ",no_oPC,FALSE );
+            FloatingTextStringOnCreature(" Pro rukojet je nutne umistit do spalku osekane drevo a shodne moridlo ",no_oPC,FALSE );
                 }
           break;}  //konec case 4
 

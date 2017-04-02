@@ -33,9 +33,9 @@ void main()
                 if (GetLocalInt(OBJECT_SELF,"obch_q_lastquest") > ku_GetTimeStamp())
                 return;
 
-                if(Random(100) > 80) { //  Vygeneruj quest s 25% sanci
-                SetLocalInt(OBJECT_SELF,"obch_q_lastquest",ku_GetTimeStamp(0,60));
-                                            //40 minut v pripade ze zadny quest neni
+                if(Random(100) > 80) { //  Vygeneruj quest s 20% sanci
+                SetLocalInt(OBJECT_SELF,"obch_q_lastquest",ku_GetTimeStamp(0,10));
+                                            //10 minut v pripade ze zadny quest neni
                 return;
                                     }
 
@@ -43,27 +43,31 @@ void main()
 
     SetLocalInt(OBJECT_SELF,"no_poptavka",no_nahoda);
     switch(no_nahoda) {
-  //vycistene veci
-case id_no_suse_obyc: SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_suse_obyc); break;
+  //susene kuze
+/*case id_no_suse_obyc: SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_suse_obyc); break;
 case id_no_suse_leps : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_suse_leps); break;
 case id_no_suse_kval : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_suse_kval); break;
 case id_no_suse_mist : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_suse_mist); break;
-case id_no_suse_velm : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_suse_velm); break;
-case id_no_suse_lege : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_suse_lege); break;
-
+case id_no_suse_velm : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_suse_velm); break; */
+    //louhovane kuze
 case id_no_kuze_obyc : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_kuze_obyc); break;
 case id_no_kuze_leps : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_kuze_leps); break;
 case id_no_kuze_kval : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_kuze_kval); break;
 case id_no_kuze_mist : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_kuze_mist); break;
 case id_no_kuze_velm : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_kuze_velm); break;
-case id_no_kuze_lege : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_kuze_lege); break;
+     //louhovane kozky
+case id_no_kozk_obyc : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_kozk_obyc); break;
+case id_no_kozk_leps : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_kozk_leps); break;
+case id_no_kozk_kval : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_kozk_kval); break;
+case id_no_kozk_mist : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_kozk_mist); break;
+case id_no_kozk_velm : SetLocalString(OBJECT_SELF,"no_nazevveci",resref_no_kozk_velm); break;
     }
 
 
 
 
-    no_nahoda = Random(no_nastav_maximalni_pocet_vyrobku)+1;//vygeneruje kolik toho chce
-    SetLocalInt(OBJECT_SELF,"no_pocetveci",no_nahoda);
-    SetLocalInt(OBJECT_SELF,"obch_q_lastquest",ku_GetTimeStamp(0,720)); // zachova si quest celej restart
-   }                                                                    //=12 hod REAL
+    no_nahoda = 5+Random(10);//vygeneruje kolik toho chce
+    SetLocalInt(OBJECT_SELF,"no_pocetveci",5+Random(10));
+    SetLocalInt(OBJECT_SELF,"obch_q_lastquest",ku_GetTimeStamp(0,120)); //
+   }                                                                    //=2 hod REAL
 }

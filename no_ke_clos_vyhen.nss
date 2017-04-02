@@ -74,9 +74,6 @@ case 3:   { no_slin(no_Item,OBJECT_SELF,FALSE);
 ///////////  V teto chvili jsme zjistili co je v peci. takze se jen vytvari pravdepodobnosti dane veci a pripadne vyrobky
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
-int TC_ke_VLASTNOST  = GetAbilityScore(GetLastDisturbed(), ABILITY_DEXTERITY,TRUE);
-/////////je to v .ini ale nemohlo to v ini najit last distrurbed..
-
 
 /////////////polotovar//////////////////////////////////////////////////////
 no_Item = GetFirstItemInInventory(OBJECT_SELF);
@@ -103,7 +100,7 @@ while (GetIsObjectValid(no_Item)) {
                 //////////predelavka 1.9.2014/////////
                 if (no_pocet_cyklu == 9) {
                 DeleteAllInContainer(OBJECT_SELF); //smazu vse z kontejneru
-                Persist_SaveItemToDB(no_Item, Persist_InitContainer(OBJECT_SELF)); //ulozim tam novou vec.
+                //Persist_SaveItemToDB(no_Item, Persist_InitContainer(OBJECT_SELF)); //ulozim tam novou vec.
 
             SetLocalInt(no_Item,"no_pocet_cyklu",no_pocet_cyklu);
             no_zamkni(no_oPC);

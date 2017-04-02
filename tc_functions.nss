@@ -26,6 +26,15 @@ void TC_AlchRemoveConflictProperties(object oTarget, int alcheff);
 // Do nothing when no_mazani == FALSE
 void TC_SnizStack(object oItem, int no_mazani);
 
+////////////////
+// Reopen craft device
+void TC_Reopen(object no_oPC);
+
+///////////////
+// Destroy buttons in PC inventory
+void TC_DestroyButtons(object no_oPC);
+
+
 /* end declaration */
 
 
@@ -357,6 +366,11 @@ void TC_AlchRemoveConflictProperties(object oTarget, int alcheff) {
   }
 }
 
+//////////////////////////////////////////////////////
+/// Craft common functions
+
+//////////////////////////////////////////////////////
+
 void TC_SnizStack(object oItem, int no_mazani)
 {
   if(!no_mazani)
@@ -370,4 +384,182 @@ void TC_SnizStack(object oItem, int no_mazani)
       //FloatingTextStringOnCreature(" Tolikati prisad nebylo zapotrebi ",no_oPC,FALSE );
       SetItemStackSize(oItem,no_stacksize-1);
   }
+}
+
+void TC_Reopen(object no_oPC) {
+  AssignCommand(no_oPC,DoPlaceableObjectAction(OBJECT_SELF,PLACEABLE_ACTION_USE));
+  //   AssignCommand(oPC,DelayCommand(1.0,DoPlaceableObjectAction(GetNearestObjectByTag(GetTag(oSelf),oPC,1),PLACEABLE_ACTION_USE)));
+}
+
+
+////////Znici tlacitka z inventare ///////////////////////
+void TC_DestroyButtons(object oPlc)
+{
+  object no_Item = GetFirstItemInInventory(oPlc);
+
+  while (GetIsObjectValid(no_Item)) {
+
+    if( (GetResRef(no_Item) != "prepinac001") &&
+        (GetResRef(no_Item) != "prepinac003") ){
+      no_Item = GetNextItemInInventory(oPlc);
+      continue;     //znicim vsechny prepinace 001
+    }
+    DestroyObject(no_Item,0.1);
+
+    no_Item = GetNextItemInInventory(oPlc);
+  }
+
+}
+
+void TC_MakeButton(string sTag, string sName, int iButton = 1, object oContainer = OBJECT_SELF) {
+  SetName(CreateItemOnObject("prepinac00"+IntToString(iButton),oContainer,1,sTag),sName);
+}
+
+int TC_getProgressByDifficulty(int no_obtiznost_vyrobku) {
+
+  // result is returned value / 10
+
+  if(no_obtiznost_vyrobku > 190)
+    no_obtiznost_vyrobku = 190;
+
+  if (no_obtiznost_vyrobku >= 180 )
+    return (200 - no_obtiznost_vyrobku) / 10;
+  if (no_obtiznost_vyrobku >= 170)
+    return Random(3) +1;
+  if (no_obtiznost_vyrobku >= 160)
+    return Random(5) +1;
+  if (no_obtiznost_vyrobku >= 130)
+    return Random(20)  + (160 - no_obtiznost_vyrobku) / 10;
+  if (no_obtiznost_vyrobku >= 10)
+    return Random(20)  + (130 - no_obtiznost_vyrobku) / 2;
+  // < 10
+  return Random(20) + 100;
+}
+
+int TC_getDestroyingByDifficulty(int no_obtiznost_vyrobku) {
+  // result is returned value / 10
+
+  if(no_obtiznost_vyrobku > 190)
+    no_obtiznost_vyrobku = 190;
+
+  if (no_obtiznost_vyrobku>=180)
+    return (210 - no_obtiznost_vyrobku) / 10;
+  if (no_obtiznost_vyrobku>=170)
+    return Random(6);
+  if (no_obtiznost_vyrobku>=160)
+    return Random(8);
+  if (no_obtiznost_vyrobku>=130)
+    return Random(20) + (180 - no_obtiznost_vyrobku) / 10;
+  if(no_obtiznost_vyrobku>=10)
+    return Random(20) - FloatToInt(no_obtiznost_vyrobku * 0.7) + 93; // !!! To check
+  // < 10
+  return Random(20) + 150;
+}
+
+string TC_getBaseItemShortcut(int iBase) {
+
+  switch(iBase) {
+    case BASE_ITEM_LONGSWORD: return "dl";
+    case BASE_ITEM_DAGGER: return "dy";
+    case BASE_ITEM_SHORTSWORD: return "kr";
+    case BASE_ITEM_BASTARDSWORD: return "ba";
+    case BASE_ITEM_GREATSWORD: return "vm";
+    case BASE_ITEM_KATANA: return "ka";
+    case BASE_ITEM_RAPIER: return "ra";
+    case BASE_ITEM_SCIMITAR: return "sc";
+    case BASE_ITEM_HALBERD: return "ha";
+    case BASE_ITEM_SHORTSPEAR: return "ko";
+    case BASE_ITEM_SCYTHE: return "ks";
+    case BASE_ITEM_TRIDENT: return "tr";
+    case BASE_ITEM_WHIP: return "bc";
+    case BASE_ITEM_KAMA: return "km";
+    case BASE_ITEM_KUKRI: return "ku";
+    case BASE_ITEM_SICKLE: return "sr";
+    case BASE_ITEM_DOUBLEAXE: return "ds";
+    case BASE_ITEM_TWOBLADEDSWORD: return "dm";
+    case BASE_ITEM_DIREMACE: return "dp";
+    case BASE_ITEM_GREATAXE: return "os";
+    case BASE_ITEM_HANDAXE: return "rs";
+    case BASE_ITEM_DWARVENWARAXE: return "ts";
+    case BASE_ITEM_BATTLEAXE: return "bs";
+    case BASE_ITEM_LIGHTFLAIL: return "lc";
+    case BASE_ITEM_HEAVYFLAIL: return "tc";
+    case BASE_ITEM_LIGHTHAMMER: return "lk";
+    case BASE_ITEM_WARHAMMER: return "vk";
+    case BASE_ITEM_CLUB: return "kj";
+    case BASE_ITEM_LIGHTMACE: return "pa";
+    case BASE_ITEM_MORNINGSTAR: return "re";
+    case 318: return "ma"; // was "re" //Maul
+    case BASE_ITEM_QUARTERSTAFF: return "hu";
+    case 303: return "x2"; // Sai
+    case 305: return "x3"; // falchion
+    case 310: return "x4"; // Katar
+    case 304: return "x5"; // Nunchaku
+    case 308: return "x6"; // Sap
+    case 321: return "x7"; // Double scimitar
+    case 317: return "x8"; // Heavy mace
+    case 320: return "y1"; // Mercuruial gretsword
+    case 319: return "y2"; // Mercurial longsword
+    case 324: return "y3"; // Maugdoublesword
+    case 203: return "ss"; // One handed spear
+    case 301: return "hp"; // heavy pick
+    case 302: return "lp"; // Light pick
+    case 300: return "ot"; // Onehanded trident
+    case BASE_ITEM_GLOVES: return "ru";
+  }
+
+  return "";
+}
+
+int TC_getBaseItemByShortcut(string str) {
+  if(str == "dl") return BASE_ITEM_LONGSWORD;
+  if(str == "dy") return BASE_ITEM_DAGGER;
+  if(str == "kr") return BASE_ITEM_SHORTSWORD;
+  if(str == "ba") return BASE_ITEM_BASTARDSWORD;
+  if(str == "vm") return BASE_ITEM_GREATSWORD;
+  if(str == "ka") return BASE_ITEM_KATANA;
+  if(str == "ra") return BASE_ITEM_RAPIER;
+  if(str == "sc") return BASE_ITEM_SCIMITAR;
+  if(str == "ha") return BASE_ITEM_HALBERD;
+  if(str == "ko") return BASE_ITEM_SHORTSPEAR;
+  if(str == "ks") return BASE_ITEM_SCYTHE;
+  if(str == "tr") return BASE_ITEM_TRIDENT;
+  if(str == "bc") return BASE_ITEM_WHIP;
+  if(str == "km") return BASE_ITEM_KAMA;
+  if(str == "ku") return BASE_ITEM_KUKRI;
+  if(str == "sr") return BASE_ITEM_SICKLE;
+  if(str == "ds") return BASE_ITEM_DOUBLEAXE;
+  if(str == "dm") return BASE_ITEM_TWOBLADEDSWORD;
+  if(str == "dp") return BASE_ITEM_DIREMACE;
+  if(str == "os") return BASE_ITEM_GREATAXE;
+  if(str == "rs") return BASE_ITEM_HANDAXE;
+  if(str == "ts") return BASE_ITEM_DWARVENWARAXE;
+  if(str == "bs") return BASE_ITEM_BATTLEAXE;
+  if(str == "lc") return BASE_ITEM_LIGHTFLAIL;
+  if(str == "tc") return BASE_ITEM_HEAVYFLAIL;
+  if(str == "lk") return BASE_ITEM_LIGHTHAMMER;
+  if(str == "vk") return BASE_ITEM_WARHAMMER;
+  if(str == "kj") return BASE_ITEM_CLUB;
+  if(str == "pa") return BASE_ITEM_LIGHTMACE;
+  if(str == "re") return BASE_ITEM_MORNINGSTAR;
+  if(str == "ma") return 318;
+  if(str == "hu") return BASE_ITEM_QUARTERSTAFF;
+  if(str == "x2") return 303;
+  if(str == "x3") return 305;
+  if(str == "x4") return 310;
+  if(str == "x5") return 304;
+  if(str == "x6") return 308;
+  if(str == "x7") return 321;
+  if(str == "x8") return 317;
+  if(str == "y1") return 320;
+  if(str == "y2") return 319;
+  if(str == "y3") return 324;
+  if(str == "ss") return 203;
+  if(str == "hp") return 301;
+  if(str == "lp") return 302;
+  if(str == "ot") return 300;
+  if(str == "ru") return BASE_ITEM_GLOVES;
+
+return -1;
+
 }

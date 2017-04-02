@@ -346,6 +346,9 @@ int KU_RingToLevel(int SpellLevel, int iClass)
 {
  float fEqLevel = 0.0;
 
+ if(SpellLevel == 0){
+    SpellLevel = 1;
+ }
 
  if( (iClass==CLASS_TYPE_RANGER)  ||
      (iClass==CLASS_TYPE_PALADIN) ) {
@@ -428,7 +431,7 @@ int X2PreSpellCastCode()
    // with TRUE (unless they are DM possessed or in the Wild Magic Area in
    // Chapter 2 of Hordes of the Underdark.
    //---------------------------------------------------------------------------
-   if (!GetIsPC(OBJECT_SELF))
+   if (!GetIsPC(OBJECT_SELF) || GetIsPossessedFamiliar(OBJECT_SELF))
    {
        if( !GetIsDMPossessed(OBJECT_SELF) && !GetLocalInt(GetArea(OBJECT_SELF), "X2_L_WILD_MAGIC"))
        {

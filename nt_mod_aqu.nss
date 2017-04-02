@@ -18,7 +18,7 @@ void main()
 {
      object oItem = GetModuleItemAcquired();
      ExecuteScript("ku_m_onacquired",OBJECT_SELF);
-
+/*
      // ncraft - start (me_ncr_on_aquinc)
      object oMod=GetModule();
      object oPC = GetModuleItemAcquiredBy(); //GetItemPossessor(oItem);
@@ -26,7 +26,7 @@ void main()
 
      doWithAquiredItem(oItem,oPC,oLast,oMod);
      // ncraft - end
-
+*/
      // * Generic Item Script Execution Code
      // * If MODULE_SWITCH_EXECUTE_TAGBASED_SCRIPTS is set to TRUE on the module,
      // * it will execute a script that has the same name as the item's tag
@@ -34,6 +34,7 @@ void main()
      // * GetUserDefinedItemEventNumber(). See x2_it_example.nss
      if (GetModuleSwitchValue(MODULE_SWITCH_ENABLE_TAGBASED_SCRIPTS) == TRUE)
      {
+        object oItem = GetModuleItemAcquired();
         SetUserDefinedItemEventNumber(X2_ITEM_EVENT_ACQUIRE);
         int nRet =   ExecuteScriptAndReturnInt(GetUserDefinedItemEventScriptName(oItem),OBJECT_SELF);
         if (nRet == X2_EXECUTE_SCRIPT_END)

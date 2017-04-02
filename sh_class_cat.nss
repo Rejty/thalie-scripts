@@ -283,6 +283,7 @@ void RemoveClassItemPropertyAndEffects(object oPC, object oPCSkin)
         || (iEffect == EFFECT_BRUTALNI_VRH )
         || (iEffect == EFFECT_SPEED)
         || (iEffect == EFFECT_SPELL_RESISTANCE)
+        || (iEffect == EFFECT_DAMAGE_REDUCTION)
         )
         {
             RemoveEffect(oPC,eLoop);
@@ -310,6 +311,52 @@ void RemoveClassItemPropertyAndEffects(object oPC, object oPCSkin)
         ipLoop = GetNextItemProperty(oPCSkin);
      }
 
+}
+
+int __FEAT_GENERAL_OBRANA_SE_DVEMA_ZBRANEMA(object oPC) {
+  int iBonus = 1;
+  int iCreatureSize = GetCreatureSize(oPC);
+
+  if (GetHasFeat(FEAT_GENERAL_LEPSI_OBRANA_SE_DVEMA_ZBRANEMA,oPC) == TRUE)
+    iBonus = 3;
+  if (GetHasFeat(FEAT_EPICGENERAL_EPICKA_OBRANA_DVEMA_ZBRANEMA,oPC) == TRUE)
+    iBonus = 5;
+
+  object oMainWeapon = GetItemInSlot(INVENTORY_SLOT_RIGHTHAND,oPC);
+  // Check main weapon validity
+  if(!GetIsObjectValid(oMainWeapon))
+    return 0;
+
+  // Check if it is weapon
+  int iMainWeaponType = GetBaseItemType(oMainWeapon);
+  if(Get2DAString("baseitems","StorePanel",iMainWeaponType) != "1")
+    return 0;
+
+  // Check for ranged weapons
+  if(StringToInt(Get2DAString("baseitems","RangedWeapon",iMainWeaponType)) > 0)
+    return 0;
+
+  // Two handed weapons
+  int iWeaponSize = StringToInt(Get2DAString("baseitems","WeaponSize",iMainWeaponType));
+  if(iCreatureSize + 1 == iWeaponSize) {
+    return iBonus;
+  }
+
+  // Two weapons - check offhand.
+  object oOffWeapon = GetItemInSlot(INVENTORY_SLOT_LEFTHAND, oPC);
+  if(!GetIsObjectValid(oOffWeapon))
+    return 0;
+
+  int iOffWeapon = GetBaseItemType(oOffWeapon);
+  // Check for ranged weapons
+  if(StringToInt(Get2DAString("baseitems","RangedWeapon",iOffWeapon)) > 0)
+    return 0;
+
+  // Check if it is weapon
+  if(Get2DAString("baseitems","StorePanel",iOffWeapon) == "1")
+    return iBonus;
+
+  return 0;
 }
 
 /*
@@ -389,60 +436,7 @@ void RefreshBonusACNaturalBase(object oPC, object oPCSkin)
 
     if (GetHasFeat(FEAT_GENERAL_OBRANA_SE_DVEMA_ZBRANEMA,oPC) == TRUE)
     {
-       iWeaponBonus = 1;
-       if (GetHasFeat(FEAT_GENERAL_LEPSI_OBRANA_SE_DVEMA_ZBRANEMA,oPC) == TRUE) iWeaponBonus = 3;
-       if (GetHasFeat(FEAT_EPICGENERAL_EPICKA_OBRANA_DVEMA_ZBRANEMA,oPC) == TRUE) iWeaponBonus = 5;
-       if (GetRacialType(oPC)==RACIAL_TYPE_HALFLING || GetRacialType(oPC)==RACIAL_TYPE_GNOME)
-       {
-           iItemTypeLeftOff = GetBaseItemType(GetItemInSlot(INVENTORY_SLOT_LEFTHAND,oPC));
-           if (
-           (iItemTypeLeftOff == BASE_ITEM_DAGGER) ||
-           (iItemTypeLeftOff == BASE_ITEM_HANDAXE) ||
-           (iItemTypeLeftOff == BASE_ITEM_KAMA) ||
-           (iItemTypeLeftOff == BASE_ITEM_KUKRI) ||
-           (iItemTypeLeftOff == BASE_ITEM_LIGHTHAMMER) ||
-           (iItemTypeLeftOff == BASE_ITEM_LIGHTMACE) ||
-           (iItemTypeLeftOff == BASE_ITEM_LONGSWORD) ||
-           (iItemTypeLeftOff == BASE_ITEM_SHORTSWORD) ||
-           (iItemTypeLeftOff == BASE_ITEM_SICKLE)
-           )
-           {
-            iBonus +=iWeaponBonus;
-           }
-
-       }
-       else //normalni velikost rasy
-       {
-           iItemTypeRightMain = GetBaseItemType(GetItemInSlot(INVENTORY_SLOT_RIGHTHAND,oPC));
-           iItemTypeLeftOff = GetBaseItemType(GetItemInSlot(INVENTORY_SLOT_LEFTHAND,oPC));
-           if (
-           (iItemTypeLeftOff == BASE_ITEM_BASTARDSWORD) ||
-           (iItemTypeLeftOff == BASE_ITEM_BATTLEAXE) ||
-           (iItemTypeLeftOff == BASE_ITEM_CLUB) ||
-           (iItemTypeLeftOff == BASE_ITEM_DAGGER) ||
-           (iItemTypeLeftOff == BASE_ITEM_DWARVENWARAXE) ||
-           (iItemTypeLeftOff == BASE_ITEM_HANDAXE) ||
-           (iItemTypeLeftOff == BASE_ITEM_KAMA) ||
-           (iItemTypeLeftOff == BASE_ITEM_KATANA) ||
-           (iItemTypeLeftOff == BASE_ITEM_KUKRI) ||
-           (iItemTypeLeftOff == BASE_ITEM_LIGHTFLAIL) ||
-           (iItemTypeLeftOff == BASE_ITEM_LIGHTHAMMER) ||
-           (iItemTypeLeftOff == BASE_ITEM_LIGHTMACE) ||
-           (iItemTypeLeftOff == BASE_ITEM_LONGSWORD) ||
-           (iItemTypeLeftOff == BASE_ITEM_MORNINGSTAR) ||
-           (iItemTypeLeftOff == BASE_ITEM_RAPIER) ||
-           (iItemTypeLeftOff == BASE_ITEM_SCIMITAR) ||
-           (iItemTypeLeftOff == BASE_ITEM_SHORTSWORD) ||
-           (iItemTypeLeftOff == BASE_ITEM_SICKLE) ||
-           (iItemTypeLeftOff == BASE_ITEM_WARHAMMER) ||
-           (iItemTypeRightMain == BASE_ITEM_DIREMACE) ||
-           (iItemTypeRightMain == BASE_ITEM_DOUBLEAXE) ||
-           (iItemTypeRightMain == BASE_ITEM_TWOBLADEDSWORD)
-           )
-           {
-            iBonus +=iWeaponBonus;
-           }
-        }
+       iBonus += __FEAT_GENERAL_OBRANA_SE_DVEMA_ZBRANEMA(oPC);
     }
     iItemTypeLeftOff = GetBaseItemType(GetItemInSlot(INVENTORY_SLOT_LEFTHAND,oPC));
     if ((GetHasFeat(FEAT_KURTIZANA_POBLOUZNENI,oPC) == TRUE) && (iItemTypeLeftOff == 314) )  //FASHION ACC...
@@ -542,11 +536,7 @@ void ApplyBonusSaves(object oPC, object oPCSkin)
          {
                iDeath +=1;
          }
-         if (GetHasFeat(FEAT_KENSAI_BONUS,oPC) == TRUE) {
-           // From 15. level +2 bonus every 5th. level.
-           // Feat is granted on 15. level so <0 is not needed.
-           iReflex += (((GetLevelByClass(CLASS_TYPE_WEAPON_MASTER, oPC) - 10) / 5) *2);
-         }
+
        // pridani bonusu
         if (iReflex > 0)
         {
@@ -601,6 +591,14 @@ void ApplyAB_AC_DMGBonus(object oPC, object oPCSkin)
     int iACdeflection= 0;
     int iACnatural = 0;
     int iDMG= 0;
+    /*Bonus vojevudce pdk - znalost boje*/
+    if (GetHasFeat(1283,oPC) == TRUE)
+    {
+           int iLvl = GetLevelByClass(41,oPC);
+           iDMG +=(iLvl-5)/5+1;
+           iAB +=(iLvl-5)/5+1;
+           iACnatural +=(iLvl-5)/5+1;
+    }
     /*Bonus trpasliciho obrance*/
     if (GetHasFeat(FEAT_BONUS_AC_TRPASLICI_OBRANCE,oPC)== TRUE)
     {
@@ -609,8 +607,6 @@ void ApplyAB_AC_DMGBonus(object oPC, object oPCSkin)
 
     }
 
-    if (GetHasFeat(FEAT_EPIC_FIGHTER,oPC) == TRUE)
-    {
         //bojova zkusenost - ab a dmg
         if (GetHasFeat(FEAT_FIGHTER_BOJOVA_ZKUSENOST1,oPC) == TRUE)
         {
@@ -659,17 +655,6 @@ void ApplyAB_AC_DMGBonus(object oPC, object oPCSkin)
             iDMG +=2;
         }
 
-    }
-    //bonusy kensaie
-    if (GetLevelByClass(CLASS_TYPE_WEAPON_MASTER, oPC) > 3)
-    {
-        int lvl = GetLevelByClass(CLASS_TYPE_WEAPON_MASTER,oPC);
-//        int iBonusAC = (lvl -3) / 4 +1;
-        int iBonusAB = lvl / 3;
-        iAB += iBonusAB;
-//        iACshield += iBonusAC;
-        iDMG += iBonusAB;
-    }
     //shinobi bonus do dodge AC
     if (GetHasFeat(FEAT_SHINOBI_BONUS_AC,oPC) == TRUE)
     {
@@ -741,18 +726,7 @@ void ApplyAB_AC_DMGBonus(object oPC, object oPCSkin)
         ApplyEffectToObject(DURATION_TYPE_PERMANENT, eLink,oPC);
     }
 
-    /*Exorcistuv dmg divine*/
-    if (GetHasFeat(FEAT_EXORCISTA_ZHOUBA_ZLA,oPC))
-    {
-       int iWis = GetAbilityModifier(ABILITY_WISDOM,oPC);
-       int iDamage = GetDamageBonusByLevelExorcista(iWis);
-       effect ef = EffectDamageIncrease(iDamage,DAMAGE_TYPE_DIVINE);
-       effect eLink = VersusAlignmentEffect(ef,ALIGNMENT_ALL,ALIGNMENT_EVIL);
-       eLink = SupernaturalEffect(ef);
-       SetEffectSpellId(eLink,EFFECT_AB_AC_DMG);
-       ApplyEffectToObject(DURATION_TYPE_PERMANENT, eLink,oPC);
 
-    }
 
     /*feat - svaty uder*/
     if (GetHasFeat(FEAT_EPICGENERAL_SVATY_UDER,oPC))
@@ -874,6 +848,13 @@ void AddSkillIPBonuses(object oPC, object oPCSkin)
     int iUseMagicDevice = 0;
 
     //uprava bonusu na zaklade featu
+        /*Vojevudcuv bonus - Mastered discipline*/ //+1 on level 3 and each 3 levels +1
+         if (GetHasFeat(1284,oPC) == TRUE)  //FEAT_PDK_MASTERED_DISCIPLINE
+         {
+                int iLvL = GetLevelByClass(41,oPC);
+                iDiscipline +=(iLvL/3);
+         }
+
         /*Zlodejuv bonus - nenapadnost*/
          if (GetHasFeat(FEAT_ROGUE_KAPSAR1,oPC) == TRUE)
          {
@@ -1019,12 +1000,7 @@ void AddSkillIPBonuses(object oPC, object oPCSkin)
                 iAppraise+= 2;
                 iTaunt+= 2;
          }
-         /*Kensaiuv akrobat*/
-         if (GetHasFeat(FEAT_KENSAI_AKROBAT,oPC) == TRUE)
-         {
-                iTumble +=20;
 
-         }
          /*Exorcistova znalost magie*/
          if (GetHasFeat(FEAT_EXORCISTA_ZNALOST_MAGIE,oPC) == TRUE)
          {
@@ -1236,6 +1212,7 @@ void AddSkillIPBonuses(object oPC, object oPCSkin)
             case SUBRACE_DWARF_DUERGAR_BRONZED:
                 iHide+=2;
                 iMoveSilently+=2;
+                iSpellcraft+=2;
             break;
 
             case SUBRACE_ORC_CITY:
@@ -1472,6 +1449,7 @@ void ApplyDamageReduction(object oPC, object oPCSkin)
     }
 
     itemproperty ip;
+    effect ef,eSup;
     //pohlceni
     if (iDamageReductionFire >0)
     {
@@ -1500,52 +1478,60 @@ void ApplyDamageReduction(object oPC, object oPCSkin)
     //zranitelnost
     if (iVulnerabilityFire >0)
     {
-        ip = ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_FIRE,GetIPDamageVulnerabilityConstant(iVulnerabilityFire));
-        SetItemPropertySpellId(ip,IP_DAMAGE_REDUCTION);
-        AddItemProperty(DURATION_TYPE_TEMPORARY,ip,oPCSkin,99999.0);
+        ef =  EffectDamageImmunityDecrease(DAMAGE_TYPE_FIRE,iVulnerabilityFire);
+        eSup = SupernaturalEffect(ef);
+        SetEffectSpellId(eSup,EFFECT_DAMAGE_REDUCTION);
+        ApplyEffectToObject(DURATION_TYPE_PERMANENT,eSup,oPC);
     }
     if (iVulnerabilityCold >0)
     {
-        ip = ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_COLD,GetIPDamageVulnerabilityConstant(iVulnerabilityCold));
-        SetItemPropertySpellId(ip,IP_DAMAGE_REDUCTION);
-        AddItemProperty(DURATION_TYPE_TEMPORARY,ip,oPCSkin,99999.0);
+        ef =  EffectDamageImmunityDecrease(DAMAGE_TYPE_COLD,iVulnerabilityCold);
+        eSup = SupernaturalEffect(ef);
+        SetEffectSpellId(eSup,EFFECT_DAMAGE_REDUCTION);
+        ApplyEffectToObject(DURATION_TYPE_PERMANENT,eSup,oPC);
     }
     if (iVulnerabilityAcid >0)
     {
-        ip = ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ACID,GetIPDamageVulnerabilityConstant(iVulnerabilityAcid));
-        SetItemPropertySpellId(ip,IP_DAMAGE_REDUCTION);
-        AddItemProperty(DURATION_TYPE_TEMPORARY,ip,oPCSkin,99999.0);
+        ef =  EffectDamageImmunityDecrease(DAMAGE_TYPE_ACID,iVulnerabilityAcid);
+        eSup = SupernaturalEffect(ef);
+        SetEffectSpellId(eSup,EFFECT_DAMAGE_REDUCTION);
+        ApplyEffectToObject(DURATION_TYPE_PERMANENT,eSup,oPC);
     }
     if (iVulnerabilityElec >0)
     {
-        ip = ItemPropertyDamageVulnerability(IP_CONST_DAMAGETYPE_ELECTRICAL,GetIPDamageVulnerabilityConstant(iVulnerabilityElec));
-        SetItemPropertySpellId(ip,IP_DAMAGE_REDUCTION);
-        AddItemProperty(DURATION_TYPE_TEMPORARY,ip,oPCSkin,99999.0);
+        ef =  EffectDamageImmunityDecrease(DAMAGE_TYPE_ELECTRICAL,iVulnerabilityElec);
+        eSup = SupernaturalEffect(ef);
+        SetEffectSpellId(eSup,EFFECT_DAMAGE_REDUCTION);
+        ApplyEffectToObject(DURATION_TYPE_PERMANENT,eSup,oPC);
     }
     //immunita
     if (iImmunityFire >0)
     {
-        ip = ItemPropertyDamageImmunity(IP_CONST_DAMAGETYPE_FIRE,GetIPDamageImmunityConstant(iImmunityFire));
-        SetItemPropertySpellId(ip,IP_DAMAGE_REDUCTION);
-        AddItemProperty(DURATION_TYPE_TEMPORARY,ip,oPCSkin,99999.0);
+        ef =  EffectDamageImmunityIncrease(DAMAGE_TYPE_FIRE,iImmunityFire);
+        eSup = SupernaturalEffect(ef);
+        SetEffectSpellId(eSup,EFFECT_DAMAGE_REDUCTION);
+        ApplyEffectToObject(DURATION_TYPE_PERMANENT,eSup,oPC);
     }
     if (iImmunityCold >0)
     {
-        ip = ItemPropertyDamageImmunity(IP_CONST_DAMAGETYPE_COLD,GetIPDamageImmunityConstant(iImmunityCold));
-        SetItemPropertySpellId(ip,IP_DAMAGE_REDUCTION);
-        AddItemProperty(DURATION_TYPE_TEMPORARY,ip,oPCSkin,99999.0);
+        ef =  EffectDamageImmunityIncrease(DAMAGE_TYPE_COLD,iImmunityCold);
+        eSup = SupernaturalEffect(ef);
+        SetEffectSpellId(eSup,EFFECT_DAMAGE_REDUCTION);
+        ApplyEffectToObject(DURATION_TYPE_PERMANENT,eSup,oPC);
     }
     if (iImmunityAcid >0)
     {
-        ip = ItemPropertyDamageImmunity(IP_CONST_DAMAGETYPE_ACID,GetIPDamageImmunityConstant(iImmunityAcid));
-        SetItemPropertySpellId(ip,IP_DAMAGE_REDUCTION);
-        AddItemProperty(DURATION_TYPE_TEMPORARY,ip,oPCSkin,99999.0);
+        ef =  EffectDamageImmunityIncrease(DAMAGE_TYPE_ACID,iImmunityAcid);
+        eSup = SupernaturalEffect(ef);
+        SetEffectSpellId(eSup,EFFECT_DAMAGE_REDUCTION);
+        ApplyEffectToObject(DURATION_TYPE_PERMANENT,eSup,oPC);
     }
     if (iImmunityElec >0)
     {
-        ip = ItemPropertyDamageImmunity(IP_CONST_DAMAGETYPE_ELECTRICAL,GetIPDamageImmunityConstant(iImmunityElec));
-        SetItemPropertySpellId(ip,IP_DAMAGE_REDUCTION);
-        AddItemProperty(DURATION_TYPE_TEMPORARY,ip,oPCSkin,99999.0);
+        ef =  EffectDamageImmunityIncrease(DAMAGE_TYPE_ELECTRICAL,iImmunityElec);
+        eSup = SupernaturalEffect(ef);
+        SetEffectSpellId(eSup,EFFECT_DAMAGE_REDUCTION);
+        ApplyEffectToObject(DURATION_TYPE_PERMANENT,eSup,oPC);
     }
     // kompletni imunita
     if (iImmunityPoison)
@@ -1622,7 +1608,7 @@ void ApplyRegeneration(object oPC, object oPCSkin)
 {
 
     int iRegeneration = 0;
-    /*CERNOKNEZNIK Dábelská pružnost*/
+    /*CERNOKNEZNIK DÃ¡belskÃ¡ pruÂžnost*/
     if (GetHasFeat(FEAT_CERNOKNEZNI_DABELSKA_PRUZNOST,oPC) == TRUE)
     {
          iRegeneration += (GetLevelByClass(CLASS_TYPE_CERNOKNEZNIK,oPC)-8)/5+1;
@@ -1680,6 +1666,11 @@ void ApplySpeed(object oPC, object oPCSkin)
     if (iSubrace == SUBRACE_ELF_WINGED)
     {
        iSpeed+= 20;
+    }
+
+    if ((GetLevelByClass(CLASS_TYPE_MONK,oPC))>= 10)
+    {
+       iSpeed+= 150;
     }
 
     if (iSpeed >0)
